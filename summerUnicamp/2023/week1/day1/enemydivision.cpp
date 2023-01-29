@@ -51,7 +51,7 @@ int main() {
 
     if(group[1].empty()) {
         cout << 1 << endl;
-        for(auto it: group[0]) cout << it << ' '; cout << endl;
+        for(auto it: group[0]) cout << it+1 << ' '; cout << endl;
     }else {
         cout << 2 << endl;
         for(auto it: group[0]) cout << it+1 << ' '; cout << endl;
