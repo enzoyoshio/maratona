@@ -13,29 +13,55 @@ signed main() {
     vector<int> v(n);
     for(auto& it: v) cin >> it;
 
-    int mn = *min_element(v.begin(), v.end());
-    int total = n;
+    int soma = accumulate(v.begin(), v.end(), 0LL);
 
-    while(k) {
-        int curmn = 1e15;
+    if(soma == k) {
+        for(int i = 0; i < n; i++)
+            cout << 0 << ' ';
+        cout << endl;
+        return 0;
+    }
+    set<pair<int,int>> alli;
 
-        for(int i = 0; i < n; i++) {
-            if(k-mn 
+    for(int i = 0; i < n; i++)
+        if(v[i])
+            alli.emplace(v[i], i);
+
+    int mn = 0;
+    int total = 0;
+    int nivel = 0;
+
+    // first thing to do
+    // take the 
+    while(alli.size()) {
+        ///cout << "nivel = " << nivel << " tamanho de nao zero- elementos " << alli.size() << endl;
+        ///cout << "k = " << k << endl;
+        int menor = alli.begin()->first;
+        ///cout << "menor = " << menor << endl;
+      ///  cout << "expr = " << (int)alli.size()* (menor-nivel) << endl;
+        if((int)alli.size() *( menor-nivel) >= k) {
+            // i am subtracting 
+            // by the integer division
+    ///        cout << "nivel before " << nivel << endl;
+            nivel += k/(int)alli.size();
+  ///          cout << "nivel after " << nivel << endl;
+            k %= (int)alli.size();
+            break;
         }
+        k -= (int)alli.size() * (menor-nivel);
+        while(alli.size() && alli.begin()->first == menor) {
+            alli.erase(alli.begin());
+        }
+        nivel += menor-nivel;
     }
 
-    int qt = n/k;
-    cout << "qt = " << qt << endl;
+///    cout << "last k = " << k << endl;
 
-    for(int i = 0; i < n; i++) {
-        v[i] -= qt;
-        v[i] = max(0LL, v[i]);
-    }
+    vector<int> ans(n, 0);
+    vector<pair<int,int>> gera;
+    for(auto [val, idx]: alli) gera.emplace_back(idx, val);
+    sort(gera.begin(), gera.end());
+    for(auto [idx, val]: gera) ans[idx] = val - nivel + (k > 0 ? -1:0), k--;
 
-    for(int i = 0; i < n%k; i++) {
-        if(v[i] > 0) v[i]--;
-    }
-
-    for(auto it: v) cout << it << ' '; cout << endl;
-
+    for(auto it: ans) cout <<  it << ' '; cout << endl;
 }
