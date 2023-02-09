@@ -24,7 +24,13 @@ int main() {
     sort(hs.rbegin(), hs.rend());
     sort(ws.rbegin(), ws.rend());
 
-    cout << hs.begin()->first + ws.begin()->first - (points.find(make_pair(hs.begin()->second, ws.begin()->second)) != points.end() ? 1 : 0) << endl;
+    int ans = 0;
+    for(int i = 0; (!i || hs[i].first == hs[i-1].first) && i < 10000; i++) {
+        for(int j = 0; (!j || ws[j].first == ws[j-1].first) && j < 10000; j++) {
+            int cur = hs[i].first + ws[j].first - (points.find(make_pair(hs[i].second, ws[j].second)) != points.end() ? 1 : 0);
+            ans = max(ans, cur);
+        }
+    }
 
-    
+    cout << ans << endl;
 }

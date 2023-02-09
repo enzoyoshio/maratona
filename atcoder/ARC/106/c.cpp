@@ -22,21 +22,21 @@ int main() {
 
     // construir o algoritmo aqgora
     
-    vector<pair<int,int>> ans;
+    vector<pair<int,int>> ans1, ans2;
 
     for(int t = 1; t <= taka; t++) {
-        if(ans.empty()) {
-            ans.emplace(2, 3);
+        if(ans1.empty()) {
+            ans1.emplace_back(2, 5);
         }else {
-            ans.emplace(ans.back().second + 1, ans.back() + 2);
+            ans1.emplace_back(ans.back().second + 2, ans.back().second + 5);
         }
     }
 
     for(int a = 1; a <= aoki; a++) {
         if(a == 1) {
-            ans.emplace(1, ans.back().second+1);
+            ans.emplace_back(1, ans[1].first+1);
         }else {
-            
+            ans.emplace_back(ans[2*(a-1)].first-1, ans[2*(a-1)+1].first+1); 
         }
     }
 
