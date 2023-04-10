@@ -18,21 +18,25 @@ int main() {
 
     sort(v.begin(), v.end());
 
+    set<int> disp;
     vector<int> ans(n);
     int cur = 0;
     for(auto [time, type, idx]: v) {
         
         // chegou um novo cara
         if(type == -1) {
-            ans[idx] = ++cur;
+            if(disp.empty()) {
+		ans[idx] = ++cur;
+	    }else
+		ans[idx] = *disp.begin(), disp.erase(disp.begin());
         }
 
         if(type == 1) {
-            cur--;
+		disp.insert(ans[idx]);	
         }
     }
 
-    cout << ans.size() << endl;
+    cout << cur << endl;
     for(auto it: ans) 
         cout << it << ' ';
     cout << endl;

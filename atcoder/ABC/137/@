@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+	cin.tie(0)->sync_with_stdio(false);
+
+	int n, m;
+	cin >> n >> m;
+
+	vector<pair<int,int>> v(n);
+	for(auto& [a, b]: v) 
+		cin >> a >> b;
+
+	sort(v.begin(), v.end(), [](pair<int,int> a, pair<int,int> b) {
+		return a.second > b.second || (a.second == b.second && a.first > b.first);
+	});
+
+	int idx = 0, ans = 0;
+	for(int dia = 1; dia <= m; dia++) {
+		while(idx < n && dia + v[idx].first - 1 > m) {
+			idx++;
+		}	
+
+		if(idx < n) {
+			ans += v[idx].second;
+			idx++;
+		}
+	}
+
+	cout << ans << endl;
+}
