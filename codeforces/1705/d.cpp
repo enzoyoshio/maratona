@@ -2,11 +2,13 @@
 
 using namespace std;
 
-const int oo = 1e8;
+#define int long long
+
+const int oo = 1e18;
 const int MAXN = 2e5 + 98;
 int n; string s, t;
 
-int main() {
+signed main() {
 	cin.tie(0)->sync_with_stdio(false);
 
 	int test; cin >> test; while(test--) {
@@ -17,26 +19,26 @@ int main() {
 			continue;
 		}
 
-		vector<int> pos[2];
-		for(int i = 0; i < n; i++)
-			pos[s[i]-'0'].push_back(i);
+		vector<int> xors(n-1), xort(n-1);
+		for(int i = 0; i+1 < n; i++)
+			xors[i] = (s[i]-'0') ^ (s[i+1]-'0'),
+			xort[i] = (t[i]-'0') ^ (t[i+1]-'0');
 
-		int cur = s[1]-'0', ans = 0;
-		for(int i = 1; i < n-1; i++) {
-			// se o s[i] == t[i]
-			// continue pro prox
-			if(cur == t[i]-'0') {
-				cur = s[i+1]-'0';
-				continue;
-			}
-
-			if(s[i-1] != s[i+1]) {
-				ans++;
-				s[i] = '0' + !(s[i]-'0');
-				cur = s[i+1]-'0';
-			}else {
-			}	
+		vector<int> bits, bitt;
+		for(int i = 0; i < n-1; i++) {
+			if(xors[i]) bits.push_back(i);
+			if(xort[i]) bitt.push_back(i);
 		}
+
+		if(bits.size() != bitt.size()) {
+			cout << -1 << endl;
+			continue;
+		}
+
+		int ans = 0;
+		for(int i = 0; i < (int)bits.size(); i++)
+			ans += abs(bits[i]-bitt[i]);
+
 		cout << ans << endl;
 	}
 }
