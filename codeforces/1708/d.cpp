@@ -14,7 +14,14 @@ int main() {
 			ans[a]++;
 		}
 
-		while(ans.size() > 1) {
+		while(ans.size() > 1 || ans.begin()->second > 1) {
+
+			/*
+			cout << "debugando o mapa -------------------->\n";
+			for(auto [a, b]: ans) {
+				cout << "elemento " << a << " tem " << b << " ocorrencias\n";
+			}
+			*/
 
 			map<int,int> newmap;
 
@@ -28,6 +35,13 @@ int main() {
 			}
 			swap(ans, newmap);
 		}
+
+		/*
+		cout << "debugando o mapa -------------------->\n";
+		for(auto [a, b]: ans) {
+			cout << "elemento " << a << " tem " << b << " ocorrencias\n";
+		}
+		*/
 		cout << ans.begin()->first << endl;
 	}
 }
