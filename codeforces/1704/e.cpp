@@ -58,35 +58,139 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+const int MOD = 998244353;
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+struct intMod {
+  int n;
+
+  intMod(): n(0) {}
+
+  intMod(int n): n(n) {}
+
+  intMod operator+(intMod const& o) {
+    this->n = (o.n + this->n)%MOD;
+    return *this;
   }
-  return groups == 0;
+
+  void operator+=(intMod const& o) {
+    *this = *this + o;
+  }
+
+  intMod operator-(intMod const& o) {
+    this->n = ((this->n - o.n)%MOD + MOD)%MOD;
+    return *this;
+  }
+
+  void operator-=(intMod const& o) {
+    *this = *this - o;
+  }
+
+  intMod operator*(intMod const& o) {
+    this->n = (this->n * o.n)%MOD; 
+  }
+
+  void operator*=(intMod const& o) {
+    *this = *this * o;
+  }
+
+  bool operator<(intMod const& o) {
+    return this->n < o.n;
+  }
+
+  bool operator<=(intMod const& o) {
+    return this->n <= o.n;
+  }
+
+  bool operator>(intMod const& o) {
+    return this->n > o.n;
+  }
+
+  bool operator>=(intMod const& o) {
+    return this->n >= o.n;
+  }
+
+  bool operator==(intMod const& o) {
+    return this->n == o.n;
+  }
+
+};
+
+pair<intMod,intMod> merge(pair<intMod,intMod> a, pair<intMod,intMod> b) {
+  if(a.first + a.second <= b.first)
+    return b; 
+  if(b.first + b.second <= a.first)
+    return a;
+
+  if(a.first == b.first) {
+
+  }
+  if(a.first > b.first)
+    swap(a, b);
+  a.first += b.first;
+  a
+  a.second += b.second;
+  return a;
 }
 
 auto main() -> signed {
   fastio;
+  
+  int t; cin >> t; while(t--) {
+    int n, m;
+    in(n, m);
+    vector<pair<intMod,intMod>> ans(n);
+    for(auto& [a, b]: ans) {
+      int num; cin >> num;
+      b = intMod(num);
+    }
+    
+    vector<int> indeg(n), outdeg(n);
+    vector<vector<int>> g(n, vector<int>());
 
-  in(n, k);
-  v.resize(n); in(v);
+    for(int i = 0; i < m; i++) {
+      int a, b; cin >> a >> b; a--, b--;
+      indeg[b]++;
+      outdeg[a]++;
+      g[a].emplace_back(b);
+    }
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
+    // ordenacao topologica
 
-  while(l <= r) {
-    int mid = (l+r)/2;
+    queue<int> q;
+    // se ninguem chega nele, 
+    // ele eh folha
+    // comeca a cortar nele
+    for(int i = 0; i < n; i++)
+      if(indeg[i] == 0)
+        q.push(i);
 
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+    while(q.size()) {
+      auto u = q.front(); q.pop();
+
+      cerr << "to processando o vertice " << u << endl;
+      db(var(ans[u].first.n));
+      db(var(ans[u].second.n));
+      for(auto v: g[u]) {
+        indeg[v]--;
+        // fazer a logica aqui de passar
+        ans[v] = merge(ans[v], ans[u]);
+        db(var(v));
+        db(var(ans[v].first.n));
+        db(var(ans[v].second.n));
+        // se todos os antecessores
+        // tiverem sido processados
+        // eu coloco ele pra processar
+        if(!indeg[v]) {
+          q.push(v);
+        }
+      }
+    }
+
+    for(int i = 0; i < n; i++) {
+      if(outdeg[i] == 0) {
+        cout << (ans[i].first + ans[i].second).n << endl;
+        break;
+      }
+    }
   }
-
-  out(ans);
 }

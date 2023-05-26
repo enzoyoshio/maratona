@@ -10,28 +10,33 @@ int main() {
 
     int n, k;
     cin >> n >> k;
-    vector<pair<int,int>> v;
-    int ans = n;
+    vector<pair<int,int>> v(n);
 
-    for(int i = 0; i < n; i++) {
-        int a, b; cin >> a >> b;
-        v.emplace_back(a, OPEN);
-        v.emplace_back(b, CLOSE);
-    }
-
+    for(auto& [a, b]: v) cin >> b >> a;
     sort(v.begin(), v.end());
 
-    int cur = 0;
-    for(auto [time, type]: v) {
+    multiset<int> times;
+    int ans = 0;
+    for(auto [finish, start]: v) {
+      
+      // se ninguem comecou a ver o filme
+      if(times.empty()) {
+        times.insert(finish);
+        ans++;
+      }else {
+        auto p = times.upper_bound(start);
 
-        if(type == OPEN) {
-            cur++;
+        if(p != times.begin()) {
+          p--;
+          ans++;
+          times.erase(p);
+          times.insert(finish);
+        }else if(times.size() < k) {
+          times.insert(finish);
+          ans++;
         }
 
-        if(type == CLOSE) {
-            cur--;
-        }
-        if(cur > k) ans--;
+      }
     }
 
     cout << ans << endl;

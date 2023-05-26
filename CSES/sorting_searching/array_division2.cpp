@@ -27,6 +27,7 @@ signed main() {
 		int ans = oo;
 		for(int i = 0; i+1 < n; i++)
 			ans = min(ans, max(v[i], v.back()-v[i]));	
+    cout << ans << endl;
 		return 0;
 	}
 
@@ -35,7 +36,7 @@ signed main() {
 	// se o maior elemento ja for maior que 
 	// tudo ai ja nao da
 	if(mx > tot/k)
-		return cout << mx << endl, 0;
+		return cout << "oi " << mx << endl, 0;
 
 	// isso eh so um guloso?
 	int want = tot/k;

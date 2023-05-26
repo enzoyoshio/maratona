@@ -58,35 +58,59 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+const int MAXN = 2e5+8;
+int n;
+vector<vector<int>> g(MAXN);
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+vector<int> bfs(int source) {
+  vector<int> dist(n, -1);
+  queue<int> q;
+  q.push(source);
+  dist[source] = 0;
+
+  while(q.size()) {
+    auto u = q.front(); q.pop();
+
+    for(auto el: g[u]) if(dist[el] == -1) {
+      dist[el] = dist[u] + 1;
+      q.push(el);
+    }
   }
-  return groups == 0;
+  return dist;
+}
+
+pair<int,int> find_diameter() {
+  auto c = bfs(0);
+  int a, b;
+  a = max_element(begin(c), end(c)) - begin(c);
+
+  auto d = bfs(a);
+  b = max_element(begin(d), end(d)) - begin(d);
+
+  return pair<int,int>(a, b);
 }
 
 auto main() -> signed {
   fastio;
-
-  in(n, k);
-  v.resize(n); in(v);
-
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
-
-  while(l <= r) {
-    int mid = (l+r)/2;
-
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+  cin >> n;
+  for(int i = 1; i < n; i++) {
+    int a, b; cin >> a >> b; a--, b--;
+    g[a].push_back(b);
+    g[b].push_back(a);
   }
 
-  out(ans);
+  // achar diametro
+  auto [a, b] = find_diameter();
+  // fazer bfs
+  // pras duas folhas do diametro
+
+  auto bfs1 = bfs(a);
+  auto bfs2 = bfs(b);
+
+  for(int i = 0; i < n; i++) {
+    cout << max(bfs1[i], bfs2[i]) << ' ';
+  }
+  cout << endl;
 }
+
+

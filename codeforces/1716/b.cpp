@@ -58,35 +58,22 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
-
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
-  }
-  return groups == 0;
-}
-
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  int t; cin >> t; while(t--) {
+    int n; cin >> n;
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
+    vector<int> v(n);
+    iota(all(v), 1LL);
 
-  while(l <= r) {
-    int mid = (l+r)/2;
-
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+    out(n);
+    out(v);
+    for(int i = 0; i+1 < n; i++) {
+      swap(v[i], v[i+1]);
+      out(v);
+    }
   }
-
-  out(ans);
 }
+
+

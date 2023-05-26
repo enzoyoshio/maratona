@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-// Template (v1.4.2 - 2023-04-22) (codeforces:EYZ, atcoder:EYZ) {{{
+// Template (v1.4.2 - 2023-04-22) (codeforces:cebolinha, atcoder:edu) {{{
 
 #include <ext/pb_ds/assoc_container.hpp>
 #include <ext/pb_ds/tree_policy.hpp>
@@ -17,7 +17,7 @@ template<class T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag,tr
 template<class T> using V = vector<T>;
 template<class T> using min_priority_queue = priority_queue<T, vector<T>, greater<T>>;
 using ii = pair<int, int>;
-using iii = array<int, 3>;
+using iii = tuple<int,int,int>;
 
 #define all(c) c.begin(), c.end()
 #define rall(c) c.rbegin(), c.rend()
@@ -58,35 +58,60 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
-
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
-  }
-  return groups == 0;
-}
+const int oo = 1e17;
 
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  int n, m;
+  cin >> n >> m;
+  vector<pair<int,int>> g[n];
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
-
-  while(l <= r) {
-    int mid = (l+r)/2;
-
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+  for(int i = 0; i < m; i++) {
+    int a, b, c; cin >> a >> b >> c; a--, b--;
+    g[a].emplace_back(b, c);
   }
 
-  out(ans);
+  vector<vector<int>> dist(n, vector<int>(2, oo));
+  min_priority_queue<iii> pq;
+  pq.emplace(0, 0, 0);
+  dist[0][0] = 0;
+  dist[0][1] = 0;
+
+  while(pq.size()) {
+    auto [custo, idx, desconto] = pq.top(); pq.pop();
+
+    if(custo > dist[idx][desconto]) continue;
+
+    for(auto [no, peso]: g[idx]) {
+
+      // se eu ja apliquei o desconto,
+      // nao tem como aplicar denovo,
+      // so tenho uma opcao
+      if(desconto) {
+        if(custo + peso < dist[no][desconto]) {
+          dist[no][desconto] = custo + peso;
+          pq.emplace(dist[no][desconto], no, desconto);
+        }
+      }else {
+
+        // aqui eu posso escolher entre aplicar ou nao o descont
+
+        // se eu nao aplicar desconto
+        if(custo + peso < dist[no][0]) {
+          dist[no][0] = custo + peso;
+          pq.emplace(dist[no][0], no, 0);
+        }
+
+        // se eu aplicar o desconto nessa aresta
+        if(custo + peso/2 < dist[no][1]) {
+          dist[no][1] = custo + peso/2;
+          pq.emplace(dist[no][1], no, 1);
+        }
+      }
+    }
+  }
+  cout << min(dist[n-1][0], dist[n-1][1]) << endl;
 }
+
+

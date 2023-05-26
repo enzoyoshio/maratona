@@ -58,35 +58,57 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+int query(int a, int b) {
+  cout << "? " << a << ' ' << b << endl;
+  cout.flush();
+  int ans; cin >> ans; return ans;
+}
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+int getme(vector<int>& v) {
+  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
+  auto fir = query(prim, ter);
+
+  if(fir == 1) {
+    auto ss = query(prim, quar);
+
+    if(ss == 1) return prim;
+    else return quar;
+  }else if(fir == 2) {
+    auto ss = query(ter, sec);
+    if(ss == 1) return ter;
+    else return quar;
+  }else {
+    auto ss = query(sec, quar);
+    if(ss == 1) return sec;
+    else return quar;
   }
-  return groups == 0;
+  return -1;
 }
 
 auto main() -> signed {
-  fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  int t; cin >> t; while(t--) {
+    int n; cin >> n;
+    int total = 1 << n;
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
+    vector<int> v, a;
+    for(int i = 1; i <= total; i++) v.push_back(i);
 
-  while(l <= r) {
-    int mid = (l+r)/2;
-
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+    while(v.size() > 2) {
+      while(!v.empty()) {
+        vector<int> aux;
+        for(int i = 0; i < 4; i++)
+          aux.push_back(v.back()), v.pop_back();
+        a.push_back(getme(aux));
+      }
+      v = a;
+      a.clear();
+    }
+    if(v.size() == 2) {
+      cout << "? " << v[0] << ' ' << v[1] << endl;
+      int x; cin >> x;
+      if(x == 2) v[0] = v[1];      
+    }
+    cout << "! " << v[0] << endl;
   }
-
-  out(ans);
 }

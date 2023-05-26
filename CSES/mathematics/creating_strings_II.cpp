@@ -58,35 +58,47 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+const int MOD = 1e9+7;
+const int MAXN = 1e6+8;
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
-  }
-  return groups == 0;
+int add(int a, int b) {
+  return (a+b)%MOD;
+}
+
+int sub(int a, int b) {
+  return ((a-b)%MOD + MOD)%MOD;
+}
+
+int mul(int a, int b) { 
+  return (a*b)%MOD;
+}
+
+int fexp(int b, int e=MOD-2) {
+  if(e == 0) return 1LL;
+
+  int x = fexp(b, e/2);
+  x = mul(x, x);
+
+  if(e%2) x = mul(x, b);
+  return x;
 }
 
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  vector<int> f(MAXN);
+  f[0] = 1;
+  for(int i = 1; i < MAXN; i++)
+    f[i] = mul(f[i-1], i);
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
+  string s; cin >> s;
+  vector<int> freq(26, 0);
 
-  while(l <= r) {
-    int mid = (l+r)/2;
+  int ans = f[(int)s.size()];
+  
+  for(auto ch: s) freq[ch-'a']++;
 
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
-  }
+  for(auto el: freq) ans = mul(ans, fexp(f[el]));
 
-  out(ans);
+  cout << ans << endl;
 }

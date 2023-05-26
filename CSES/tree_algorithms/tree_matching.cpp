@@ -58,35 +58,50 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+#define tree tr
+const int MAXN = 2e5+10;
+V<V<int>> tree;
+int dp[MAXN][2];
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+int dfs(int cur, int p, bool ligado) {
+
+  auto& ans = dp[cur][ligado];
+
+  if(~ans) return ans;
+
+  ans = 0;
+  int soma = 0;
+
+  for(auto u: tree[cur]) if(u != p) {
+    soma += dfs(u, cur, 0);
   }
-  return groups == 0;
+
+  ans = max(ans, soma);
+  if(!ligado) {
+    for(auto u: tree[cur]) if(u != p) {
+      ans = max(ans, soma - dfs(u, cur, 0) + 1 + dfs(u, cur, 1));
+    }
+  }
+
+  return ans;
 }
 
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  memset(dp, -1, sizeof dp);
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
+  int n;
+  in(n);
+  tree.resize(n);
 
-  while(l <= r) {
-    int mid = (l+r)/2;
-
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+  for(int i = 1; i < n; i++) {
+    int a, b; in(a, b);
+    a--, b--;
+    tree[a].eb(b);
+    tree[b].eb(a);
   }
 
-  out(ans);
+  cout << dfs(0, 0, 0) << endl;
+
 }

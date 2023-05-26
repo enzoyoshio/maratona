@@ -58,35 +58,57 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+int n, m;
+V<V<int>> g;
+V<int> h, pai;
+pair<int,int> par(-1, -1);
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+void dfs(int u, int p) {
+
+  pai[u] = p;
+  h[u] = h[p] + 1;
+
+  for(auto v: g[u]) if(v != p) {
+    if(h[v] == -1)
+      dfs(v, u);
+
+    if(h[u] - h[v] + 1 >= 3 && par.first == -1) {
+      par = make_pair(u, v);
+    }
   }
-  return groups == 0;
 }
 
 auto main() -> signed {
   fastio;
+  
+  in(n, m);
+  g.resize(n+8);
+  h.assign(n+8, -1);
+  pai.resize(n+8);
+  h[0] = 0;
 
-  in(n, k);
-  v.resize(n); in(v);
-
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
-
-  while(l <= r) {
-    int mid = (l+r)/2;
-
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+  for(int i = 0; i < m; i++) {
+    int a, b; in(a,  b);
+    g[a].push_back(b);
+    g[b].push_back(a);
   }
-
-  out(ans);
+  for(int i = 1; i <= n; i++) {
+    if(h[i] == -1)
+      dfs(i, 0);
+  }
+  if(par.first == -1) cout << "IMPOSSIBLE\n";
+  else {
+    auto [u, v] = par;
+    int idx = u;
+    V<int> ans;
+    while(idx != v) {
+      ans.eb(idx);
+      idx = pai[idx];
+    }
+    ans.eb(v); ans.eb(u);
+    out(sz(ans));
+    out(ans);
+  }
 }
+
+

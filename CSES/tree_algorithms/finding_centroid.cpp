@@ -58,35 +58,43 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+int n;
+V<V<int>> g;
+V<int> amount;
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+void calc(int u=0, int p=0) {
+  
+  amount[u] = 1;
+  for(auto v: g[u]) if(v != p) {
+    calc(v, u);
+    amount[u] += amount[v];
   }
-  return groups == 0;
+}
+
+int find_centroid(int u=0, int p=0) {
+  
+  for(auto v: g[u]) {
+    int qt = amount[v];
+    if(v == p)
+      qt = amount[0] - amount[u];
+    if(qt > n/2) return find_centroid(v, u);
+  }
+  return u;
 }
 
 auto main() -> signed {
   fastio;
-
-  in(n, k);
-  v.resize(n); in(v);
-
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
-
-  while(l <= r) {
-    int mid = (l+r)/2;
-
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+  in(n);
+  g.resize(n);
+  amount.resize(n);
+  for(int i = 0; i+1 < n; i++) {
+    int a, b; cin >> a >> b;
+    a--, b--;
+    g[a].eb(b);
+    g[b].eb(a);
   }
 
-  out(ans);
+  calc();
+
+  cout << find_centroid() + 1 << endl;
 }

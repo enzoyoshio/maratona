@@ -58,35 +58,88 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+const int MAXN = 2e5+8;
+vector<vector<int>> g(MAXN);
+vector<int> tin(MAXN), tout(MAXN);
+int TIMER = -1;
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+void tour(int cur, int pai) {
+
+  tin[cur] = ++TIMER;
+
+  for(auto filho: g[cur]) if(filho != pai) {
+    tour(filho, cur);
   }
-  return groups == 0;
+
+  tout[cur] = TIMER;
 }
+
+struct ST {
+  vector<int> st;
+  int n;
+
+  ST(int _n) : n(_n) {
+    st.resize(4*n);
+  }
+
+  int update(int id, int x, int sti, int stl, int str) {
+
+    if(stl > id || str < id) return st[sti];
+
+    if(stl == str) return st[sti] = x;
+
+    int stm = (stl+str)/2, ste = (2*sti), std = (2*sti)+1;
+    return st[sti] = update(id, x, ste, stl, stm) + update(id, x, std, stm+1, str);
+  }
+
+  int query(int ql, int qr, int sti, int stl, int str) {
+    if(stl > qr || str < ql) return 0;
+
+    if(ql <= stl && str <= qr) return st[sti];
+
+    int stm = (stl+str)/2, ste = (2*sti), std = (2*sti)+1;
+
+    return query(ql, qr, ste, stl, stm) + query(ql, qr, std, stm+1, str);
+  }
+
+  int query(int ql, int qr) {
+    return query(ql, qr, 1, 0, n-1);
+  }
+
+  int update(int id, int x) {
+    return update(id, x, 1, 0, n-1);
+  }
+};
 
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  int n, m; cin >> n >> m;
+  V<int> value(n); in(value);  
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
-
-  while(l <= r) {
-    int mid = (l+r)/2;
-
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+  for(int i=1; i < n; i++) {
+    int a, b; cin >> a >> b, a--, b--;
+    g[a].push_back(b);
+    g[b].push_back(a);
   }
 
-  out(ans);
+  tour(0, 0);
+  ST st(n);
+  for(int i = 0; i < n; i++)
+    st.update(tin[i], value[i]);
+
+  while(m--) {
+    int t; cin >> t;
+
+    if(t == 1) {
+      int s, x; cin >> s >> x;
+      s--;
+      st.update(tin[s], x);
+    }else {
+      int s; cin >> s; s--;
+      cout << st.query(tin[s], tout[s]) << endl;
+    }
+  }
 }
+
+

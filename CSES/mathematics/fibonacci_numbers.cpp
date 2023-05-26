@@ -58,35 +58,47 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+const int MOD = 1e9+7;
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+vector<vector<int>> mul(vector<vector<int>> a, vector<vector<int>> b) {
+
+  vector<vector<int>> ans(a.size(), vector<int>(b[0].size()));
+
+  for(int i = 0; i < (int)a.size(); i++) {
+    for(int j = 0; j < (int)b[0].size(); j++) {
+      for(int k = 0; k < (int)b[0].size(); k++) {
+        ans[i][j] += (a[i][k]*b[k][j])%MOD;
+        ans[i][j] %= MOD;
+      }
+    }
   }
-  return groups == 0;
+
+  return ans;
+}
+
+vector<vector<int>> fexp(vector<vector<int>> base, int e) {
+  if(e == 0) return {{1, 0}, {0, 1}};
+
+  auto x = fexp(base, e/2);
+  x = mul(x, x);
+
+  if(e%2) x = mul(base, x);
+
+  return x;
 }
 
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  vector<vector<int>> ans = {{1, 1}, {1, 0}};
+  vector<vector<int>> base = {{1}, {0}};
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
+  int n; cin >> n;
+  if(n < 2) return cout << n << endl, 0;
+  ans = fexp(ans, n-1);
 
-  while(l <= r) {
-    int mid = (l+r)/2;
+  ans = mul(ans, base);
 
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
-  }
+  cout << ans[0][0] << endl; 
 
-  out(ans);
 }

@@ -58,35 +58,88 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
-
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
-  }
-  return groups == 0;
-}
+const int oo = 1e17;
 
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  int t; cin >> t; while(t--) {
+    int n; cin >> n;
+    vector<vector<int>> v(2, vector<int>(n));
+    V<int> mini(n);
+    in(v);
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
+    int ans = oo;
 
-  while(l <= r) {
-    int mid = (l+r)/2;
+    int cur = 0;
+    for(int i = 0; i < n; i++) {
+      int f = v[0][i], s = v[1][i];
+      if(i%2) swap(f, s);
 
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+      if(cur < f) cur = f;
+      if(i) cur++;
+      if(cur < s) cur = s;
+      cur++;
+      mini[i] = cur;
+    }
+    //db(var(cur));
+    ans = min(ans, cur);
+    cur = 0;
+    for(int i = 0; i < n; i++) {
+      if(cur < v[0][i]) cur = v[0][i];
+      if(i) cur++;
+    }
+    for(int i = n-1; i >= 0; i--) {
+      if(cur < v[1][i]) cur = v[1][i];
+      cur++;
+    } 
+    //db(var(cur));
+    ans = min(ans, cur);
+    cur = 0;
+    for(int i = 0; i < n; i++) {
+      int f = v[0][i], s = v[1][i];
+      if(cur < s) cur = v[1][i];
+      cur++;
+    }
+    for(int i = n-1; i; i--) {
+      if(cur < v[0][i]) cur = v[0][i];
+      cur++;
+    }
+    ans = min(ans, cur);
+
+    int maxUp = n-1, maxDown = n-1;
+    for(int i = n-2; i >= 0; i--) {
+      
+      /*
+      db(var(i));
+      db(var(maxUp));
+      db(var(maxDown));
+      db(var(v[0][maxUp]));
+      db(var(v[1][maxDown]));
+      */
+      if(v[0][maxUp] >= v[1][maxDown]) {
+        if(i%2) {
+          //db(var(max(maxUp-i + mini[i], v[0][maxUp]+1) + n-1 - maxUp + n-1 - i));
+          ans = min(ans, max(maxUp-i + mini[i], v[0][maxUp]+1) + n-1 - maxUp + n-1 - i);
+        }else {
+          //db(var(max(n-1- i + n-1 - maxUp + 1 + mini[i], v[0][maxUp]+1) + maxUp - i));
+          ans = min(ans, max(n-1- i + n-1 - maxUp + 1 + mini[i], v[0][maxUp]+1) + maxUp - i);
+        }
+      }
+      if(v[1][maxDown] >= v[0][maxUp]) {
+        if(i%2) {
+          //db(var(max(n-1-i + n-1 - maxDown + 1 + mini[i], v[1][maxDown]+1) + maxDown - i));
+          ans = min(ans, max(n-1-i + n-1 - maxDown + 1 + mini[i], v[1][maxDown]+1) + maxDown - i);
+        }else {
+          //db(var(max(maxDown - i + mini[i], v[1][maxDown]+1) + n-1- maxDown + n-1 - i + 1));
+          ans = min(ans, max(maxDown - i + mini[i], v[1][maxDown]+1) + n-1- maxDown + n-1 - i + 1);
+        }
+      }
+
+      if(v[0][i] >= v[0][maxUp]) maxUp = i;
+      if(v[1][i] >= v[1][maxDown]) maxDown = i;
+
+    }
+    out(ans);
   }
-
-  out(ans);
 }

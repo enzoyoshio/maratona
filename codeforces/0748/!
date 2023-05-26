@@ -58,35 +58,66 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+using ull = unsigned long long;
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
-  }
-  return groups == 0;
+ull mix(ull o){
+    o+=0x9e3779b97f4a7c15;
+    o=(o^(o>>30))*0xbf58476d1ce4e5b9;
+    o=(o^(o>>27))*0x94d049bb133111eb;
+    return o^(o>>31);
+    //Those constants supposedly are chosen to give this function better pseudo-random properties, but on any on-site contest, when one can't have team reference document/doesn't want to waste time searching it for implementation typing arbitrary large odd numbers by hand should be good enough
+}
+
+const int oo = 1e7;
+
+ull hashh(string const& s) {
+  ull h = 0;
+  for(auto ch: s)
+    h = mix(h ^ mix(ch));
+  return h;
 }
 
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  int n, m;
+  cin >> n >> m;
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
+  unordered_map<int,int> valor;
+  map<pair<int,int>, int> ans;
 
-  while(l <= r) {
-    int mid = (l+r)/2;
+  for(int i = 0; i < n; i++) {
+    string s; int val;
+    cin >> s >> val;
+    int normal = hashh(s);
+    cerr << "\n\n------------------------ db -------------\n";
+    db(var(s));
+    db(var(normal));
+    reverse(begin(s), end(s));
+    int reversed = hashh(s);
+    db(var(s));
+    db(var(reversed));
 
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+    // se achar o array do contrario
+    if(valor.find(normal) != valor.end()) {
+      pair<int,int> p(normal, reversed);
+      ans[p] = max(ans[p], val + valor[reversed]);
+      swap(p.first, p.second);
+      ans[p] = max(ans[p], val + valor[reversed]);
+    }
+
+    if(valor.find(reversed) == valor.end())
+      valor[reversed] = -oo;
+
+    valor[reversed] = max(valor[reversed], val);
   }
 
-  out(ans);
+  int res = 0;
+  for(auto [a, b]: ans)
+    if(b > 0)
+      res += b;
+
+  cout << res/2 << endl;
 }
+
+

@@ -54,39 +54,80 @@ template<class K, class V> auto &operator<<(ostream& os, unordered_map<K,V> cons
 template<class... A> void in(A &...a) { ((cin >> a), ...); }
 template<class... A> void out(A const&... a) { auto sep = EMPTY_STRING; ((cout << sep << a, sep = SEPARATOR), ...); cout << '\n'; }
 template<class... A> void print(A const&... a) { ((cout << a), ...); }
-#define var(x) "[", #x, " ", x, "] "
+#define var(x) "[", #x, " = ", x, "] "
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+int n, q;
+V<V<int>> arv;
+V<int> tin, tout, st, psum, cost;
+int TIMER = -1;
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+void euler(int u, int p) {
+  tin[u] = ++TIMER;
+  psum[u] = cost[u] + (p != -1 ? psum[p] : 0); 
+  for(auto v: arv[u]) if(v != p) {
+    euler(v, u);
   }
-  return groups == 0;
+  tout[u] = TIMER;
+}
+
+void update(int ul, int ur, int val, int sti=1, int stl=0, int str=n-1) {
+  if(ur < stl || ul > str) return;
+  if(ul <= stl && str <= ur) {
+    st[sti] += val;
+    return;
+  }
+  int stm = (stl + str) /2 , ste = (2*sti), std = (2*sti) + 1;
+  update(ul, ur, val, ste, stl, stm);
+  update(ul, ur, val, std, stm+1, str);
+}
+
+int query(int x, int sti=1, int stl=0, int str=n-1) {
+  if(stl > x || str < x) return 0;
+  if(stl == str) return st[sti];
+  int stm = (stl+str)/2, ste = (2*sti), std = (2*sti) +1;
+  return st[sti] + query(x, ste, stl, stm) + query(x, std, stm+1, str);
 }
 
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  in(n, q);
+  cost.resize(n);
+  in(cost);
+  arv.resize(n);
+  st.resize(4*n, 0);
+  psum.assign(n, 0);
+  tin.resize(n);
+  tout.resize(n);
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
-
-  while(l <= r) {
-    int mid = (l+r)/2;
-
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+  for(int i = 1; i < n; i++) {
+    int a, b; in(a, b); a--, b--;
+    arv[a].eb(b);
+    arv[b].eb(a);
   }
 
-  out(ans);
+  // fazer o euler tour
+  euler(0, -1);
+
+  // fazer a seg
+  for(int i = 0; i < n; i++) {
+    update(tin[i], tin[i], psum[i]);
+  }
+
+  while(q--) {
+    int t, node;
+    in(t, node);
+    node--;
+
+    // update
+    if(t == 1) {
+      int val; in(val);
+      update(tin[node], tout[node], val - cost[node]);
+      cost[node] = val;
+    }else {
+      out(query(tin[node]));
+    }
+  }
 }

@@ -58,35 +58,42 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+V<int> dp(V<int>& v) {
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+  int n = v.size();
+  V<int> ans;
+  ans.reserve(1 << n);
+  for(int bitmask = 0; bitmask < (1 << n); bitmask++) {
+    int sum = 0;
+    for(int j = 0; j < n; j++)
+      if(1 & (bitmask >> j)) sum += v[j];
+    ans.eb(sum);
   }
-  return groups == 0;
+
+  return ans;
 }
 
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  int n, x;
+  cin >> n >> x;
+  V<int> v1(n/2), v2((n+1)/2);
+  in(v1, v2);
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
+  auto ans1 = dp(v1), ans2 = dp(v2);
+  int ans = 0;
+  sort(all(ans2));
 
-  while(l <= r) {
-    int mid = (l+r)/2;
+  for(auto el: ans1) {
 
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+    int qt = x - el;
+    if(qt < 0) continue;
+    auto lb = lower_bound(all(ans2), qt);
+    auto ub = upper_bound(all(ans2), qt);
+
+    ans += ub-lb;
+
   }
-
-  out(ans);
+  cout << ans << endl;
 }

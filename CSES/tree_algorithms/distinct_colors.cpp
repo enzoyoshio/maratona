@@ -58,35 +58,48 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n, k;
-V<int> v;
+const int MAXN = 2e5+89;
+int n;
+vector<vector<int>> g(MAXN);
+vector<int> res(MAXN);
+vector<int> color(MAXN);
 
-bool check(int x) {
-  int groups = k, soma = 0;
-  for(int i = 0; i < n; i++) {
-    if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+set<int> dfs(int u, int v) {
+    
+  set<int> ans;
+  ans.insert(color[u]);
+
+  for(auto w: g[u]) if(w != v) {
+    auto f = dfs(w, u);
+
+    if(f.size() > ans.size()) swap(f, ans);
+
+    for(auto el: f)
+      ans.insert(el);
   }
-  return groups == 0;
+
+  res[u] = ans.size();
+  return ans;
 }
 
 auto main() -> signed {
   fastio;
 
-  in(n, k);
-  v.resize(n); in(v);
+  cin >> n;
+  for(int i = 0; i < n; i++)
+    cin >> color[i];
 
-  int l = 1, r = accumulate(all(v), 0LL);
-  int ans = r;
-
-  while(l <= r) {
-    int mid = (l+r)/2;
-
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+  for(int i = 1; i < n; i++) {
+    int a, b; cin >> a >> b; a--, b--;
+    g[a].push_back(b);
+    g[b].push_back(a);
   }
 
-  out(ans);
+  dfs(0, 0);
+
+  for(int i = 0; i < n; i++)
+    cout << res[i] << ' ';
+  cout << endl;
 }
+
+
