@@ -58,57 +58,40 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
+const int MAXN = 5e3+8;
+const int oo = 1e10;
+V<int> v, ones, zeros;
+int tb[MAXN][MAXN];
 
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
+int dp(int idxZ=0, int idxO=0) {
 
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
+  if(idxZ >= zeros.size()) {
+    return oo * (idxO < ones.size());
   }
-  return -1;
+
+  auto& ans = tb[idxZ][idxO];
+
+  if(~ans) return ans;
+  int pega=oo, npega=oo;
+
+  if(idxO < ones.size())
+    pega = abs(ones[idxO]-zeros[idxZ]) + dp(idxZ+1, idxO+1);
+
+  npega = dp(idxZ+1, idxO);
+
+  return ans = min(pega, npega);
 }
 
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
-
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
-
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
-      }
-      v = a;
-      a.clear();
-    }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
+  mem(tb, -1);
+  int n; in(n);
+  v.resize(n);
+  in(v);
+  for(int i = 0; i < n; i++) {
+    if(v[i]) ones.eb(i);
+    else zeros.eb(i);
   }
+  out(dp());
 }

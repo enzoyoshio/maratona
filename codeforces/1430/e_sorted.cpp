@@ -58,57 +58,72 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
+struct ST {
+  V<int> st;
+  int n;
 
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
-
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
+  ST(int _n) {
+    n = _n;
+    st.resize(4*n); 
   }
-  return -1;
-}
+
+  int query(int L, int R, int sti, int stl, int str) {
+    if(L > R) return 0;
+    if(L > str || stl > R) return 0;
+
+    if(stl <= L && R <= str) return st[sti];
+
+    int stm = (stl+str)/2, ste = 2*sti, std = 2*sti + 1;
+
+    return query(L, R, ste, stl, stm) + query(L, R, std, stm+1, str);
+  }
+  int query(int L, int R) { return query(L, R, 1, 0, n-1);}
+
+  int update(int pos, int val, int sti, int stl, int str) {
+    if(stl > pos || pos > str) return 0;
+
+    if(stl == str) return db(var(pos), var(val), var(stl)), st[sti] += val;
+
+    int stm = (stl + str)/2, ste = 2*sti, std = 2*sti+1;
+
+    return st[sti] = update(pos, val, ste, stl, stm) + update(pos, val, std, stm+1, str);
+
+  }
+  int update(int pos, int val) { return update(pos, val, 1, 0, n-1);}
+};
 
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  int n; in(n);
+  string s; in(s);
+  string rev = s;
+  reverse(all(rev));
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
-
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
-      }
-      v = a;
-      a.clear();
-    }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
+  V<int> pos[26];
+  for(int i = 0; i < n; i++) {
+    pos[rev[i]-'a'].eb(i);
   }
+  for(int i = 0; i < 26; i++)
+    reverse(all(pos[i]));
+
+  V<int> v(n);
+  for(int i = 0; i < n; i++) {
+    v[i] = pos[s[i]-'a'].back();
+    pos[s[i]-'a'].pop_back();
+  }
+
+  ST st(n);
+
+  db(var(v));
+  int ans = 0;
+  for(int i = n-1; i >= 0; i--) {
+    db(var(v[i]));
+    db(var(st.query(0, 0)));
+    db(var(st.query(0, v[i]-1)));
+    ans += st.query(0, v[i]-1);
+    st.update(v[i], 1);
+  }
+
+  out(ans);
 }

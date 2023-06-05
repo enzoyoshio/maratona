@@ -58,57 +58,129 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
+// the idea is right, but I dont know how to implement it
+// in a recursion way, going to code it iteratively just like quirino
+int make(V<int>& a, V<int>& b, int id) {
+  int n = a.size();
 
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
+  if(id < 0) return 0;
 
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
+  int countA = 0;
+  int countB = 0;
+  for(int i = 0; i < n; i++) {
+    if( ((a[i] >> id) & 1) != 0) countA++;
+    if( ((b[i] >> id) & 1) != 0) countB++;
   }
-  return -1;
+
+  int left = -1, right = -1;
+  // o xor deles depois de dar 1, vai ser 1
+  if(countA + countB == (int)a.size()) {
+    V<int> a1, a0, b1, b0;
+
+    for(int i = 0; i < n; i++) {
+      if( ((a[i] >> id) & 1) != 0) a1.eb(a[i]);
+      else a0.eb(a[i]);
+
+      if( ((b[i] >> id) & 1) != 0) b1.eb(b[i]);
+      else b0.eb(b[i]);
+    }
+
+    int ans = 1LL << id;
+
+//    V<int> prevs;
+    for(int i = 0; i < id; i++) {
+//      prevs.eb((1LL << id) | (make(a1, b0, i) & make(a0, b1, i)));
+//      ans = max(ans, prevs.back());
+      ans = max(ans, (1LL << id) | (make(a1, b0, i) & make(a0, b1, i)));
+    }
+
+    /*
+    cerr << "\n\n--------------- db -----------\n";
+    db(var(a));
+    db(var(b));
+    db(var(id));
+    db(var(a1));
+    db(var(a0));
+    db(var(b1));
+    db(var(b0));
+    db(var(countA));
+    db(var(countB));
+    db(var(ans));
+    db(var(prevs));
+    */
+
+    return ans;
+  }
+ 
+  /*
+    cerr << "\n\n--------------- db failed -----------\n";
+    db(var(a));
+    db(var(b));
+    db(var(id));
+    db(var(left));
+    db(var(right));
+    db(var(countA));
+    db(var(countB));
+    */
+
+
+  return make(a, b, id-1);
 }
+
+template<class T, class X>
+using vp = V<pair<T, X>>; 
 
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  int t; in(t); while(t--) {
+    int n; in(n);
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
+    V<int> a(n), b(n);
+    in(a, b);
+    vp<V<int>, V<int>> half{{a, b}}; 
 
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
+    int ans = 0;
+    for(int bit = 31; bit >= 0; bit--) {
+
+      bool possible = true;
+      for(auto [va, vb]: half) {
+
+        int qta = 0, qtb = 0;
+        for(auto it: va)
+          if((it >> bit) &1) qta++;
+        for(auto it: vb)
+          if((it >> bit) &1) qtb++;
+
+        if(qta + qtb != sz(va)) {
+          possible = false;
+          break;
+        }
       }
-      v = a;
-      a.clear();
+      if(!possible) continue;
+
+      ans |= 1 << bit;
+      vp<V<int>, V<int>> novo;
+      for(auto [va, vb]: half) {
+        
+        pair<V<int>, V<int>> a1b0, a0b1;
+
+        for(auto it: va) {
+          if((it >> bit) & 1) a1b0.first.eb(it);
+          else a0b1.first.eb(it);
+        }
+
+        for(auto it: vb) {
+          if((it >> bit) & 1) a0b1.second.eb(it);
+          else a1b0.second.eb(it);
+        }
+
+        if(a0b1.first.size()) novo.eb(a0b1);
+        if(a1b0.first.size()) novo.eb(a1b0);
+      }
+      swap(half, novo);
     }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
+
+    out(ans);
   }
 }

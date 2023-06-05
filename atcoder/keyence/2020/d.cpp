@@ -15,6 +15,7 @@ template<class T> using ordered_set = tree<T, null_type, less<T>, rb_tree_tag,tr
 #define fastio ios::sync_with_stdio(false); cin.tie(nullptr)
 
 template<class T> using V = vector<T>;
+template<class T> using Q = queue<T>;
 template<class T> using min_priority_queue = priority_queue<T, vector<T>, greater<T>>;
 using ii = pair<int, int>;
 using iii = array<int, 3>;
@@ -58,57 +59,73 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
+const int MAXN = 19;
+const int MAXV = 51;
+const int oo = 1e5;
+int n;
+V<ii> v;
+int tb[MAXV][1LL << MAXN];
+
+bool check(V<ii>& v) {
+  bool sorted = true;
+  for(int i = 0; i+1 < n; i++)
+    sorted &= v[i].first <= v[i+1].first;
+  return sorted;
 }
 
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
-
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
+int dp(int cur=0, int bitmask=0) {
+  if(__builtin_popcountll(bitmask) >= n) {
+    return 0;
   }
-  return -1;
+
+  auto& ans = tb[cur][bitmask];
+  if(~ans) return ans;
+  ans = oo;
+
+  int next_pos = __builtin_popcountll(bitmask);
+  int used = 0;
+  for(int i = 0; i < n; i++) {
+    if(((bitmask >> i) & 1) != 0) {
+      next_pos--;
+      continue;
+    }
+
+    if(i%2 == next_pos%2) {
+      if(v[i].first >= cur)
+        ans = min(ans, abs(i-next_pos+used) + dp(v[i].first, bitmask | (1LL << i))); 
+    }else {
+      if(v[i].second >= cur)
+        ans = min(ans, abs(i-next_pos+used) + dp(v[i].second, bitmask | (1LL << i)));
+    } 
+
+    /*
+    cerr << "\n\n----------------------- oioioi----------------------------\n";
+    db(var(cur));
+    db(var(bitset<20>(bitmask)));
+    db(var(i));
+    db(var(next_pos));
+    db(var(v[i].first));
+    db(var(v[i].second));
+    db(var(ans));
+    */
+  }
+
+  return ans;
 }
 
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  mem(tb, -1);
+  in(n);
+  v.resize(n);
+  for(int i = 0; i < n; i++) in(v[i].first);
+  for(int i = 0; i < n; i++) in(v[i].second);
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
+  auto res = oo;
+  for(int i = 0; i < n; i++)
+    res = min(res, i + dp(i%2 ? v[i].second : v[i].first, 1LL << i));
 
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
-      }
-      v = a;
-      a.clear();
-    }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
-  }
+  if(res >= oo) return out(-1), 0;
+  out(res/2);
 }

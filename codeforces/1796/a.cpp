@@ -58,57 +58,22 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
-
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
-
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
-  }
-  return -1;
-}
-
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
-
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
-
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
-      }
-      v = a;
-      a.clear();
+  string p;
+  for(int i = 1; i < 100; i++) {
+    if(i%3 == 0) p += 'F';
+    if(i%5 == 0) p += 'B';
+  }
+  int t; in(t); while(t--) {
+    int n;
+    string s;
+    in(n, s);
+    bool can = false;
+    for(int i = 0; !can && i+sz(s)-1 < sz(p); i++) {
+      if(p.substr(i, sz(s)) == s) can = true; 
     }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
+    out(cond(can, "YES", "NO"));
   }
 }

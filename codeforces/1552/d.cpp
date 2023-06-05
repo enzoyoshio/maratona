@@ -58,57 +58,43 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
-
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
-
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
-  }
-  return -1;
-}
+#define yes "Yes"
+#define no "No"
 
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  int t; in(t); while(t--) {
+    int n; in(n);
+    V<int> v(n); in(v);
+    sort(all(v));
+    
+    if(n == 1) {
+      out(cond(v[0] == 0, yes, no));
+      continue;
+    }
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
+    set<int> s = {0};
+    for(auto el: v) s.insert(abs(el));
 
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
+    bool can = false;
+    V<int> dif;
+    for(int i = 0; i < n; i++) {
+      for(int j = 0; j < n; j++) {
+        dif.eb(v[i]-v[j]);
+
+        if(s.find(max(v[i], v[j]) -min(v[j], v[i])) != s.end())
+          can = true;
       }
-      v = a;
-      a.clear();
+      db(var(v[i]));
+      db(var(dif));
+      dif.clear();
     }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
+
+    out(cond(can, yes, no));
   }
 }
+
+// what I should do? 
+// How do I find if there are three numbers A, B, C in array such that
+// A + B = C

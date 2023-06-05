@@ -58,57 +58,27 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
-
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
-
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
-  }
-  return -1;
-}
-
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  int t; in(t); while(t--) {
+    int n; string s;
+    in(n, s);
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
-
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
-      }
-      v = a;
-      a.clear();
+    V<int> toR(n, 1), toL(n, 1);
+    for(int i = n-1; i >= 0; i--) {
+      if(i+1 < n && s[i+1] != s[i]) toR[i] += toR[i+1];
     }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
+    for(int i = 0; i < n; i++) {
+      if(i-1 >= 0 && s[i] != s[i-1]) toL[i] += toL[i-1];
     }
-    cout << "! " << v[0] << endl;
+
+    for(int i = 0; i <= n; i++) {
+      int ans = 0;
+      if(i < n && s[i] == 'R') ans += toR[i];
+      if(i > 0 && s[i-1] == 'L') ans += toL[i-1];
+      cout << ans+1 << ' ';
+    }
+    cout << endl;
   }
 }

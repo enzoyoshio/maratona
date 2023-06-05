@@ -58,57 +58,45 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
+const int oo = 1e18;
+const int MAXN = 3e5+8;
+int x, y, z, n;
+string s;
+int tb[MAXN][2];
 
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
+int dp(int idx=0, bool caps=0) {
 
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
+  if(idx >= n) {
+    return 0;
   }
-  return -1;
+
+  auto& ans = tb[idx][caps];
+  if(~ans) return ans;
+  ans = oo;
+
+  if(s[idx] == 'a') {
+    if(!caps) {
+      ans = min(ans, min(x + dp(idx+1, 0), x + z + dp(idx+1, 1)));
+    }else {
+      ans = min(ans, min(y + dp(idx+1, 1), y + z + dp(idx+1, 0)));
+    }  
+  }else {
+    if(!caps) {
+      ans = min(ans, min(y + dp(idx+1, 0), y + z + dp(idx+1, 1)));
+    }else {
+      ans = min(ans, min(x + dp(idx+1, 1), x + z + dp(idx+1, 0)));
+    }  
+  }
+
+  return ans;
 }
 
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
-
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
-
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
-      }
-      v = a;
-      a.clear();
-    }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
-  }
+  mem(tb, -1);
+  in(x, y, z, s);
+  n = s.size();
+  
+  cout << min(dp(), z + dp(0, 1)) << endl;
 }

@@ -58,57 +58,45 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
-
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
-
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
-  }
-  return -1;
-}
-
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  int t; in(t); while(t--) {
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
+    string a, b; in(a, b);
 
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
+    if(a == b) {
+      out("YES");
+      out(a);
+      continue;
+    }
+
+
+    if(a[0] == b[0]) {
+      cout << "YES\n";
+      cout << a[0] << "*\n";
+      continue;
+    }
+    if(a.back() == b.back()) {
+      out("YES");
+      cout << "*" << a.back() << '\n';
+      continue;
+    }
+
+    int id = -1;
+    for(int i = 0; id == -1 && i+1 < sz(a); i++) {
+      for(int j = 0; id == -1 && j+1 < sz(b); j++) {
+        if(a[i] == b[j] && a[i+1] == b[j+1]) {
+          id = i;
+        }
       }
-      v = a;
-      a.clear();
     }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
+    if(id == -1) {
+      out("NO");
+      continue;
     }
-    cout << "! " << v[0] << endl;
+
+    out("YES");
+    cout << '*' << a[id] << a[id+1] << '*' << '\n';
   }
 }

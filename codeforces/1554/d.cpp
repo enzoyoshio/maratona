@@ -33,6 +33,7 @@ using iii = array<int, 3>;
 #define inbounds(x, l, r) ((l) <= (x) && (x) <= (r))
 #define L1(res...) [&](auto x){ return res; }
 #define L2(res...) [&](auto x, auto y){ return res; }
+#define endl '\n'
 
 template<class T, class U> inline void miq(T& a, U b){ if (a > b) a = b; }
 template<class T, class U> inline void maq(T& a, U b){ if (a < b) a = b; }
@@ -58,57 +59,33 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
-
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
-
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
-  }
-  return -1;
-}
-
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  int t; in(t); while(t--) {
+    int n; in(n);
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
-
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
-      }
-      v = a;
-      a.clear();
+    if(n == 1) {
+      out('a');
+      continue;
+    }else if(n == 2) {
+      out("ab");
+      continue;
+    }else if(n == 3) {
+      out("abc");
+      continue;
     }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
+
+    string s="";
+    for(int i = 0; i < n/2; i++)
+      s += 'a';
+    s.pop_back();
+    s += 'b';
+    cout << s;
+    s.pop_back();
+    s += 'a';
+    cout << s;
+    if(n%2) cout << 'c';
+    cout << endl;
   }
 }

@@ -58,57 +58,86 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
-
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
-
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
-  }
-  return -1;
-}
-
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  int t; in(t); while(t--) {
+    int n; in(n);
+    V<int> v(n); in(v);
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
-
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
+    V<int> dp(n, 1);
+    V<int> ancestor(n, -1);
+    for(int i = 0; i < n; i++) {
+      for(int j = 0; j < i; j++) {
+        if(v[j] < v[i] && dp[j] + 1 > dp[i]) {
+          dp[i] = dp[j] + 1;
+          ancestor[i] = j;
+        }
       }
-      v = a;
-      a.clear();
     }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
+
+    set<int> path;
+    int maxi = 0;
+    int lis = 0;
+    for(int i = 0; i < n; i++) {
+      lis = max(lis, dp[i]);
+      if(dp[i] > dp[maxi]) maxi = i;
     }
-    cout << "! " << v[0] << endl;
+
+    while(maxi != -1) {
+      path.emplace(maxi);
+      maxi = ancestor[maxi];
+    }
+
+    V<int> ans(n);
+    if(lis == n) {
+      out(ans);
+      continue;
+    }
+
+    out("antes de preencher oq deu");
+    for(int i = n-lis-1; i < n; i++)
+      ans[i] = min(n-lis, n-1);
+
+    out("preencheu o q deu");
+    set<ii> interval;
+    for(int i = 0; i < n; i++) {
+      if(path.find(i) == path.end()) {
+        if(interval.size() && prev(interval.end())->second + 1 == i) {
+          auto [a, b] = *prev(interval.end());
+          interval.erase(prev(interval.end()));
+          b++;
+          interval.emplace(a, b);
+        }else
+          interval.emplace(i, i); 
+      }
+    }
+
+    out("got after knowing interval");
+    int cur = n-lis;
+    for(int i = n-lis-2; i >= 0; i--) {
+      
+      auto pp = interval.begin();
+      int mini = 2*n;
+      for(auto it = ++interval.begin(); it != interval.end(); it++) {
+        auto pre = it;
+        pre--;
+        if(abs(pre->second-it->first) < mini) mini = abs(pre->second-it->first), pp = pre;
+      } 
+
+      auto pos = pp;
+      pos++;
+
+      auto [a, b] = *pp;
+      auto [c, d] = *pos;
+      interval.erase(pp);
+      interval.erase(pos);
+      interval.emplace(a, d);
+      cur += c-d;
+
+      ans[i] = cur;
+      ans[i] = min(ans[i], n-1);
+    }
+    out(ans);
   }
 }

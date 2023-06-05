@@ -58,57 +58,55 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
+int n;
+V<V<int>> arv;
+V<int> ans;
 
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
+// 1 -> folha
+// 2 -> folha de cima -> ignorar o atual
+// 0 -> estrela do meio 
+int dfs(int u=0, int p=0) {
 
-  if(fir == 1) {
-    auto ss = query(prim, quar);
+  int cur = 1;
+  bool is_leaf = true;
 
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
+  for(auto v: arv[u]) if(v != p) {
+    is_leaf = false;
+    
+    auto children = dfs(v,u);
+    if(children == 0) {
+      cur = 2; // se meu filho na vdd eh uma estrela, entao eu faco parte dele
+    }else if(children == 1) {
+      cur = 0; // se meu filho eh folha, entao eu sou estrela
+    }else if(children == 2) {
+      cur = 1; // se meu filho faz parte de outra estrela, entao eu sou filho
+    }
   }
-  return -1;
+
+  // se for folha eu aviso ao meu pai 
+  // que ele eh estrela
+  if(is_leaf) return 1;
+
+  // se todos meus filhos sao meus filhos mesmo
+  // entao eu so o meio da estrela
+  if(cur == 0) return ans.push_back(arv[u].size()), 0;
+
+  return cur;
 }
 
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
-
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
-
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
-      }
-      v = a;
-      a.clear();
-    }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
+  in(n);
+  arv.resize(n);
+  for(int i = 1; i < n; i++) {
+    int a, b; in(a, b); a--, b--;
+    arv[a].push_back(b);
+    arv[b].push_back(a);
   }
+
+  dfs();
+
+  sort(all(ans));
+  out(ans);
 }

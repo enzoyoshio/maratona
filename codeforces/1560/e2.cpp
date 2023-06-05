@@ -58,57 +58,119 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
+map<int,int> freq;
+string possible;
+string s;
+V<int> qt;
 
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
+string solve() {
+    string ans = "-1";
+    int tot = 0;
+    for(int i = 0; i < qt.size(); i++) {
+      tot += freq[possible[i]]/qt[i];
+    }
+    //db(var(tot));
 
-  if(fir == 1) {
-    auto ss = query(prim, quar);
+    string cur = s.substr(0, tot);
+    int idx = tot;
+    int eraser = 0;
 
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
-  }
-  return -1;
+    while(idx < s.size() && cur != "") {
+    
+      string aux = "";
+      for(auto ch: cur)
+        if(ch != possible[eraser])
+          aux += ch;
+      cur = aux;
+
+      /*
+      db(var(s.size()));
+      db(var(idx));
+      db(var(cur));
+      db(var(s.substr(idx, cur.size())));
+      */
+      if(s.substr(idx, cur.size()) != cur)
+        break;
+      idx += cur.size();
+      eraser++;
+    }
+
+    if(idx == s.size()) {
+      ans = s.substr(0, tot);
+    }
+    return ans;
 }
 
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  int t; in(t); while(t--) {
+    freq.clear();
+    possible = "";
+    in(s);
+    int n = s.size();
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
+    set<char> old;
+    for(int i = n-1; i >= 0; i--) {
+      if(old.find(s[i]) == old.end()) 
+        possible += s[i];
+      old.insert(s[i]);
+      freq[s[i]]++;
+    }
+    reverse(all(possible));
 
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
+    V<int> eq(n, 1);
+    for(int i = 1; i < n; i++)
+      if(s[i] == s[i-1]) eq[i] += eq[i-1];
+
+    bool pass = false;
+    qt.resize(possible.size());
+    string ans = "-1";
+
+    int teste = freq[s.back()];
+    //out(teste);
+    for(int i = 1; i*i <= teste; i++) {
+      if(ans != "-1") break;
+
+      pass = false;
+      // i = last i guys must be the same letter
+      // and i should be divisible by freq[c]
+      // or fre[c] is a multilple of i
+      if(teste%i == 0 && i <= eq.back() && teste/i >= qt.size()) {
+          qt.back() = teste/i;
+          for(int j = (int)qt.size()-2; j >= 0; j--) {
+            qt[j] = qt[j+1] -1;
+            if(qt[j] <= 0) {
+              pass = true;
+              break;
+            }
+            pass |= freq[possible[j]]%qt[j];
+          }
+          
+          if(!pass) {
+            ans = solve();          
+          }
+       }
+      pass = false;
+      int ii = teste/i;
+      if( teste%ii == 0 && ii != i && ii <= eq.back() && i >= qt.size()) {
+          qt.back() = i;
+          for(int j = (int)qt.size()-2; j >= 0; j--) {
+            qt[j] = qt[j+1] -1;
+            if(qt[j] <= 0) {
+              pass = true;
+              break;
+            }
+            pass |= freq[possible[j]]%qt[j];
+          }
+          if(!pass) {
+            ans = solve();
+          }
       }
-      v = a;
-      a.clear();
-    }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
+    } 
+
+    if(ans == "-1") out(ans);
+    else
+      out(ans, possible);
   }
 }

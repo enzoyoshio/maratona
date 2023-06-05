@@ -58,57 +58,159 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
-}
+const int oo = 1e9;
 
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
-
-  if(fir == 1) {
-    auto ss = query(prim, quar);
-
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
-  }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
+struct ST {
+  V<int> st;
+  int n;
+  
+  ST() {
+    n = -1; // sei la
   }
-  return -1;
-}
+
+  ST(int _n) {
+    n = _n;
+    st.resize(4*n);
+  }
+
+  void build(int _n) {
+    n = _n;
+    st.resize(4*n);
+  }
+
+  // point query
+  int query(int x, int sti, int stl, int str) {
+    
+    if(stl > x || str < x) return 0;
+
+    if(stl == str) return st[sti];
+    
+    int stm = (stl+str)/2, ste = 2*sti, std = 2*sti+1;
+
+    return st[sti] + query(x, ste, stl, stm) + query(x, std, stm+1, str);
+  }
+  int query(int x) { return query(x, 1, 0, n-1);}
+
+  // range update
+  int update(int L, int R, int x, int sti, int stl, int  str) {
+    if(L > str || R < stl) return 0;
+
+    if(L <= stl && str <= R) return st[sti] += x;
+
+    int stm = (stl+str)/2, ste = 2*sti, std = 2*sti + 1;
+
+    update(L, R, x, ste, stl, stm);
+    update(L, R, x, std, stm+1, str); 
+    return 0;
+  }
+  int update(int L, int R, int x) { return update(L, R, x, 1, 0, n-1);}
+
+  // get first idx that is greater or equal to x
+  int lower_bound(int x) {
+    return lower_bound(x, 1, 0, n-1);
+  }
+  int lower_bound(int x, int sti, int stl, int str) {
+    
+    if(stl == str) {
+      if(st[stl] >= x) return stl;
+      return n;
+    }
+    // se todos os caras no range [stl, str] 
+    // sao menores entao nao tem resposta
+    if(x - st[sti] > 0) return n;
+    else {
+      int stm = (stl + str)/2, ste = 2*sti, std = 2*sti+1;
+
+      return min(lower_bound(x - st[sti], ste, stl, stm), lower_bound(x - st[sti], std, stm+1, str));
+    }
+  }
+
+  // get first idx that is greater to x
+  int upper_bound(int x) {
+    return upper_bound(x, 1, 0, n-1);
+  }
+  int upper_bound(int x, int sti, int stl, int str) {
+    
+    if(stl == str) {
+      if(st[stl] > x || st[stl] < 0) return stl;
+      return n;
+    }
+    // se todos os caras no range [stl, str] 
+    // sao menores entao nao tem resposta
+    if(x - st[sti] >= 0 || st[stl] < 0) return n;
+    else {
+      int stm = (stl + str)/2, ste = 2*sti, std = 2*sti+1;
+
+      return min(upper_bound(x - st[sti], ste, stl, stm), upper_bound(x - st[sti], std, stm+1, str));
+    }
+  }
+
+
+};
 
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  int n; in(n);
+  string s; in(s);
+  string rev = s;
+  reverse(all(rev));
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
+  if(s == rev) return out(0), 0;
 
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
-      }
-      v = a;
-      a.clear();
-    }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
+  V<int> v[26];
+  for(int i = 0; i < n; i++) {
+    v[s[i]-'a'].eb(i);
   }
+
+  V<ST> sts(26, ST());
+
+  for(int i = 0; i < 26; i++) {
+    sts[i].build(v[i].size());
+    for(int j = 0; j < v[i].size(); j++) {
+      sts[i].update(j, j, v[i][j]);
+    } 
+  }
+
+  int ans = 0;
+  for(int i = 0; i < n; i++) {
+    int id = rev[i]-'a';
+  
+    // procurar na seg o primeiro que esteja 
+    // mais proximo de i 
+    int lower = sts[id].lower_bound(i);
+    int val = sts[id].query(lower);
+
+    db(var(lower));
+    db(var(i));
+    db(var(rev[i]));
+
+    if(!lower) {
+      sts[id].update(0, 0, -oo);
+    }else {
+      int pre = sts[id].query(lower-1);
+      sts[id].update(lower, lower, pre-val);
+    }
+
+    // adicionando a resposta
+    ans += val - i;
+
+    cerr << "before adding\n";
+    for(int j = 0; j < 26; j++) {
+      db(var(id));
+      cerr << "before adding 1\n";
+      if(j == id) continue;
+      
+      cout << "got here\n";
+      // get all that are in the range [i, lower]
+      int lower1 = sts[j].lower_bound(i);
+      int upper = sts[j].upper_bound(val);
+      cout << "ended here\n";
+      upper--;
+      if(upper >= lower1)
+        sts[j].update(lower1, upper, 1);
+    }
+  }
+
+  out(ans);
 }

@@ -58,57 +58,102 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int query(int a, int b) {
-  cout << "? " << a << ' ' << b << endl;
-  cout.flush();
-  int ans; cin >> ans; return ans;
+const int MAXN = 5e5+8;
+const int oo = 1e10;
+int n, c = 0;
+vector<pair<int,int>> st;
+vector<int> v, qry(MAXN);
+
+pair<int,int> build(int sti=1, int stl=0, int str=n-1) {
+
+  if(stl == str) return st[sti] = {v[stl], stl};
+
+  int stm = (stl+str)/2, ste = 2*sti, std = 2*sti+1;
+
+  return st[sti] = max(build(ste, stl, stm), build(std, stm+1, str));
 }
 
-int getme(vector<int>& v) {
-  int prim = v[0], sec = v[1], ter = v[2], quar = v[3];
-  auto fir = query(prim, ter);
+pair<int,int> update(int val, int id, int sti=1, int stl=0, int str=n-1) {
+  
+  if(stl > id || str < id) return {0, -1};
 
-  if(fir == 1) {
-    auto ss = query(prim, quar);
+  if(stl == str) return st[sti] = {val, id};
 
-    if(ss == 1) return prim;
-    else return quar;
-  }else if(fir == 2) {
-    auto ss = query(ter, sec);
-    if(ss == 1) return ter;
-    else return sec;
+  int stm = (stl+str)/2, ste = 2*sti, std = 2*sti+1;
+
+  return st[sti] = max(update(val, id, ste, stl, stm), update(val, id, std, stm+1, str));
+}
+
+pair<int,int> query(int ql, int qr, int sti=1, int stl=0, int str=n-1) {
+
+  if(ql > str || qr < stl) return {0, -1};
+
+  if(ql <= stl && str <= qr) return st[sti];
+
+  int stm = (stl+str)/2, ste = 2*sti, std = 2*sti+1;
+
+  return max(query(ql, qr, ste, stl, stm), query(ql, qr, std, stm+1, str));
+}
+
+int rec(int l, int r) {
+  
+//  if(c++ > 10) return 0;
+
+  if(l > r) return 0;
+  if(l == r) return v[qry[l]];
+
+  // idx -> of vector v
+  auto [maxi, idx] = query(qry[l], qry[r]);
+
+  // same -> of vector qry
+  auto same = lower_bound(begin(qry)+l, begin(qry)+r+1, idx) - (begin(qry));
+
+  if(r-l == 1)
+    return v[qry[l]] + v[qry[r]] + maxi;
+
+  /*
+  db(var(l));
+  db(var(r));
+  db(var(maxi));
+  db(var(same));
+  db(var(idx));
+  cerr << "\n\n";
+  */
+
+  int ans = 0;
+  int sz = r-l+1;
+  int pre = same-l;
+  // se o maior for um dos idx
+  if(qry[same] == idx) {
+   // db(var(sz-same+1));
+    ans += (pre+1) * (sz-pre) * maxi;
+    ans += rec(l, same-1);
+    ans += rec(same+1, r); 
   }else {
-    auto ss = query(sec, quar);
-    if(ss == 1) return sec;
-    else return quar;
+    ans += (pre) * (sz-pre) * maxi;
+    ans += rec(l, same-1);
+    ans += rec(same, r);
   }
-  return -1;
+  return ans;
 }
 
 auto main() -> signed {
+  fastio;
 
-  int t; cin >> t; while(t--) {
-    int n; cin >> n;
-    int total = 1 << n;
+  in(n);
+  v.resize(n);
+  st.resize(4*n);
+  in(v);
 
-    vector<int> v, a;
-    for(int i = 1; i <= total; i++) v.push_back(i);
+  build();
 
-    while(v.size() > 2) {
-      while(!v.empty()) {
-        vector<int> aux;
-        for(int i = 0; i < 4; i++)
-          aux.push_back(v.back()), v.pop_back();
-        a.push_back(getme(aux));
-      }
-      v = a;
-      a.clear();
-    }
-    if(v.size() == 2) {
-      cout << "? " << v[0] << ' ' << v[1] << endl;
-      int x; cin >> x;
-      if(x == 2) v[0] = v[1];      
-    }
-    cout << "! " << v[0] << endl;
+  int q; in(q);
+  while(q--) {
+    int tam; in(tam);
+
+    for(int i = 0; i < tam; i++)
+      cin >> qry[i], qry[i]--;
+
+    cout << rec(0, tam-1) << '\n';
   }
 }
