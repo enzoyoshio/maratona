@@ -58,50 +58,70 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+const int oo = 1e15;
+
+map<ii, int> faz(V<iii> &v) {
+
+  map<ii, int> c;
+  int n = sz(v);
+
+  for(int bitmask = 1; bitmask < 1 << n; bitmask++) {
+    iii cur = {0, 0, 0};
+    for(int i = 0; i < n; i++) {
+      if((bitmask >> i) & 1) {
+        cur[0] += v[i][0];
+        cur[1] += v[i][1];
+        cur[2] += v[i][2];
+      }
+    }
+
+    if(c.find({cur[0], cur[1]}) == c.end()) c[{cur[0], cur[1]}] = cur[2];
+    else miq(c[{cur[0], cur[1]}], cur[2]);
+  }
+  return c;
+}
+
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  int n, ma, mb;
+  in(n, ma, mb);
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  V<iii> v(n);
+  for(int i = 0; i < n; i++)
+    cin >> v[i][0] >> v[i][1] >> v[i][2];
+
+  V<iii> v1, v2;
+  for(int i = 0; i < n/2; i++) {
+    v1.eb(v.back());
+    v.pop_back();
   }
-}
+  while(v.size()) {
+    v2.eb(v.back());
+    v.pop_back();
+  }
 
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80
+  auto first = faz(v1), second = faz(v2);
+
+  int ans = oo;
+  first[{0, 0}] = 0;
+  for(auto [a, b]: first) {
+    auto [num, den] = a;
+
+    for(int i = 0; i < 50; i++) {
+      int need_num = ma*i - num;
+      int need_den = mb*i - den;
+      if(need_num < 0 || need_den < 0) continue;
+
+      if(second.find({need_num, need_den}) != second.end()) {
+        ans = min(ans, b + second[{need_num, need_den}]);
+      }
+      if(!need_num && !need_den && num && den) {
+        ans = min(ans, b);
+      }
+    }
+  }
+
+  if(ans == oo) out(-1);
+  else out(ans);
+}

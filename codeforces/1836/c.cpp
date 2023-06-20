@@ -58,50 +58,89 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+void print(int a, int b, int c) {
+  cout << a << " + " << b << " = " << c << '\n';
+}
+
+int digits(int num) {
+  int c = 0;
+  while(num) c++, num /= 10;
+  return c;
+}
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  V<int> fexp(10);
+  fexp[0] = 1;
+  for(int i = 1; i < fexp.size(); i++) fexp[i] = fexp[i-1]*10;
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  V<V<V<V<iii>>>> save(4, V<V<V<iii>>>(4, V<V<iii>>(4)));
+
+  for(int i = 1; i < 1000; i++) {
+    for(int j = 1; j < 1000; j++) {
+      if(to_string(i+j).size() > 3) continue;
+      save[digits(i)][digits(j)][digits(i+j)].eb(iii{i, j, i+j});
+    }
+  }
+
+  int t; in(t); while(t--) {
+    int a, b, c, k; in(a, b, c, k);
+    
+    if(max(a, b) + 1 < c || c < min(a, b)) {
+      out(-1);
+      continue;
+    }
+
+    if(a<= 3 && b<= 3 && c<= 3) {
+      k--;
+      if(save[a][b][c].size() > k) {
+        auto [aa, bb, cc] = save[a][b][c][k];
+        print(aa, bb, cc);
+      }
+      else out(-1);
+      continue;
+    }
+
+    int a1 = fexp[a-1];
+    int a2 = fexp[a]-1;
+    bool good = false;
+    for(int i = a1; i <= a2 && !good; i++) {
+      if(k < 0) break;
+      int l = fexp[b-1], r = fexp[b]-1, ans = l-1;
+
+      int first = digits(i+l);
+      // acha o numero mais alto tal que nao estoure;
+      while(l <= r) {
+        int mid = (l+r)/2;
+
+        if(digits(i + mid) == first) ans = mid, l = mid+1;
+        else r = mid-1; 
+      }
+      /*
+      db(var(i));
+      db(var(ans));
+      db(var(k));
+      */
+
+      if(first == c) {
+        // k ta aqui
+        if(k <= ans-fexp[b-1]+1) {
+          print(i, fexp[b-1] + k-1, i+fexp[b-1]+k-1);
+          good = true;
+        }else {
+          k -= ans-fexp[b-1]+1;
+        }
+      }else {
+
+        if(k <= fexp[b]-1-ans) {
+          print(i, ans+k, i+ans+k);
+          good = true;
+        }else {
+          k -= fexp[b]-ans-1;
+        }
+      }
+    }
+
+    if(!good) out(-1);
   }
 }
-
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80

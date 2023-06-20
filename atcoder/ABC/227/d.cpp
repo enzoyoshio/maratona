@@ -33,6 +33,7 @@ using iii = array<int, 3>;
 #define inbounds(x, l, r) ((l) <= (x) && (x) <= (r))
 #define L1(res...) [&](auto x){ return res; }
 #define L2(res...) [&](auto x, auto y){ return res; }
+#define endl '\n'
 
 template<class T, class U> inline void miq(T& a, U b){ if (a > b) a = b; }
 template<class T, class U> inline void maq(T& a, U b){ if (a < b) a = b; }
@@ -58,50 +59,31 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+bool check(int teste, int k, V<int>& v) {
+  //if(teste > (int)1e18/k) return false;
+
+  int soma = 0;
+  for(auto it: v) soma += min(teste, it);
+
+  return soma/k >= teste;
+}
+
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  int n, k;
+  in(n, k);
+  V<int> v(n);
+  in(v);
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  int l = 0, r = 1e18, ans = 0;
+
+  while(l <= r) {
+    int mid = l+(r-l)/2;
+
+    if(check(mid, k, v)) ans = mid, l = mid+1;
+    else r = mid-1;
   }
-}
+  out(ans);
 
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80
+}

@@ -58,50 +58,54 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+const int MOD = 1e9+7;
+int n, m;
+V<int> s, t;
+V<V<int>> tb;
+
+int add(int a, int b) { return (a+b)%MOD;}
+int mul(int a, int b) { return (a*b)%MOD;}
+int sub(int a, int b) { return ((a-b)%MOD + MOD)%MOD;}
+int fexp(int b, int e) {
+  if(e == 0) return 1LL;
+
+  int x = fexp(b, e/2);
+  x = mul(x, x);
+  if(e%2) x = mul(x, b);
+  return x;
+}
+
+// o que eu quero que minha dp responda?
+// a maior subsequencia que eu consigo fazer,
+// se eu pegar ids e idt
+
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  in(n, m);
+  s.resize(n);
+  t.resize(m);
+  tb.assign(n+1, V<int>(m+1, 0));
+  in(s, t);
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  for(int i = 0; i <= n; i++)
+    tb[i][0] = 1;
+  for(int i = 0; i <= m; i++)
+    tb[0][i] = 1;
+  for(int i = 1; i <= n; i++) {
+    for(int j = 1; j <= m; j++) {
+      tb[i][j] = add(tb[i][j], tb[i-1][j]);
+      tb[i][j] = add(tb[i][j], tb[i][j-1]);
+      tb[i][j] = sub(tb[i][j], tb[i-1][j-1]);
+
+//      db(var(tb[i][j]));
+      if(s[i-1] == t[j-1]) {
+//        db(var(i), var(j));
+        tb[i][j] = add(tb[i][j], tb[i-1][j-1]);
+        //tb[i][j] = add(tb[i][j], mul(2, tb[i-1][j-1])); 
+        //tb[i][j] = sub(tb[i][j], tb[i-1][j-1]);
+      }
+    }
   }
+  out(tb[n][m]);
 }
-
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80

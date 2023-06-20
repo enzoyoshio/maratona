@@ -58,50 +58,47 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+const int MAXN = 55;
+int n, a, b;
+V<int> v;
+V<V<int>> tb(MAXN, V<int>(MAXN, -1));
+V<V<int>> contagem(MAXN, V<int>(MAXN, -1));
+
+int dp(int idx, int qt) {
+  if(idx >= n) {
+    return 0;
+  }
+
+  auto& ans = tb[idx][qt];
+  if(~ans) return ans;
+
+  int pega, npega;
+  npega = dp(idx+1, qt);
+  pega = v[idx] + dp(idx+1, qt-1);
+
+  return ans = max(pega, npega);
+}
+
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  in(n, a, b);
+  if(a > b) swap(a, b);
+  v.resize(n);
+  in(v);
+  sort(rall(v));
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  auto psum = v;
+  for(int i = 1; i < n; i++) psum[i] += psum[i-1];
+  int sum1 = 1, qt1 = 1;
+
+  for(int i = a-1; i <= b-1; i++) {
+    if(sum1 * (i+1) < psum[i] * qt1)
+      sum1 = psum[i], qt1 = i+1;
   }
-}
+  db(var(sum1), var(qt1));
 
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80
+  cout << fixed << setprecision(15) << (double)sum1/qt1 << endl;
+
+  // como contar quantas vezes tem isso ? 
+}

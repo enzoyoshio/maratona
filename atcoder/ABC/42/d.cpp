@@ -58,50 +58,65 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+const int MAXN = 2e5;
+const int MOD = 1e9+7;
+V<int> f(MAXN), inv(MAXN);
+
+int mul(int a, int b) { return (a*b)%MOD;}
+int add(int a, int b) { return (a+b)%MOD;}
+int sub(int a, int b) { return ((a-b)%MOD + MOD)%MOD;}
+int fexp(int b, int e=MOD-2) {
+  if(e == 0) return 1LL;
+  int x = fexp(b, e/2);
+  x = mul(x, x);
+  if(e%2) x = mul(b, x);
+  return x;
+}
+
+int C(int n, int k) {
+  return mul(mul(f[n], inv[k]), inv[n-k]);
+}
+
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  int h, w, a, b;
+  in(h, w, a, b);
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  f[0] = 1;
+  for(int i = 1; i < MAXN; i++) f[i] = mul(f[i-1], i);
+  
+  inv.back() = fexp(f.back());
+  for(int i = MAXN-2; i >= 0; i--) inv[i] = mul(inv[i+1], i+1);
+
+  int ans = C(h+w-2, h-1);
+
+  int novo = C(h-a+b-1, b);
+
+  /*
+  db(var(ans));
+  db(var(novo));
+  */
+
+  int leftW = w-b-1;
+  if(!leftW) {
+    return out(novo), 0;
   }
-}
+  for(int i = h-a+1; i <= h; i++) {
+    //db(var(i));
+    int cur = C(i+b-1, b);
 
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80
+    int leftH = h-i+1;
+    int ways = C(leftW + leftH - 2, leftH-1);
+    ans = sub(ans, mul(cur, ways));
+    ans = add(ans, mul(novo, ways));
+
+
+    /*
+    db(var(cur));
+    db(var(leftW), var(leftH));
+    db(var(ways));
+    */
+  }
+  out(ans);
+}

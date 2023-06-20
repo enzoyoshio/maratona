@@ -55,53 +55,57 @@ template<class... A> void in(A &...a) { ((cin >> a), ...); }
 template<class... A> void out(A const&... a) { auto sep = EMPTY_STRING; ((cout << sep << a, sep = SEPARATOR), ...); cout << '\n'; }
 template<class... A> void print(A const&... a) { ((cout << a), ...); }
 #define var(x) "[", #x, " ", x, "] "
-template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
+template<class... A> void db(A const&... a) { ((cerr << (a)), ...); cerr << endl; }
 //}}}
 
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
-
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  int n, m;
+  in(n, m);
+  V<V<int>> G(n);
+  for(int i = 0; i < m; i++) {
+    int a, b; in(a, b); a--, b--;
+    G[a].eb(b);
   }
-}
+  int start, finish; in(start, finish);
+  start--, finish--;
+ // db(var(start), var(finish));
 
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80
+  V<int> dist(n, -1);
+  V<V<int>> vis(n, V<int>(4, -1));
+  queue<iii> q;
+  dist[start] = 0;
+  vis[start][3] = 0;
+  q.push({start, 3, dist[start]});
+
+  while(q.size()) {
+  //  db(var(sz(q)));
+    auto [u, w, di] = q.front(); q.pop();
+ //   db(var(u), var(w), var(di));
+
+    if(u == finish && w == 0) return out(dist[finish]), 0;
+
+    for(auto v: G[u]) {
+      if(w) {
+        if(w-1 == 0) {
+          if(dist[v] == -1) {
+            dist[v] = di+1;
+            vis[v][w-1] = 1;
+            q.push({v, w-1, dist[v]});
+          }
+        }else {
+          if(vis[v][w-1] == -1) {
+            vis[v][w-1] = 1;
+            q.push({v, w-1, di});
+          }
+        }
+      }else if(vis[v][2] == -1) {
+        q.push({v, 2, dist[u]});
+      }
+    }
+  }
+//  db(var("deu ruim"));
+  out(-1);
+
+}

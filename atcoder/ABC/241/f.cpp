@@ -61,47 +61,71 @@ template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  int h, w, n;
+  in(h, w, n);
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  ii start, finish;
+  in(start, finish);
+
+  set<ii> pontos;
+  map<int, set<int>> xs, ys;
+  for(int i = 0; i < n; i++) {
+    int a, b; in(a, b);
+    pontos.emplace(a, b);
+    xs[a].insert(b);
+    ys[b].insert(a);
   }
-}
 
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80
+  V<ii> lado = {
+    {-1, 0},
+    {1, 0},
+    {0, 1},
+    {0, -1},
+  };
+  queue<ii> q;
+  q.emplace(start);
+  map<ii, int> dist;
+  dist[start] = 0;
+  while(q.size()) {
+    auto [x, y] = q.front(); q.pop();
+
+    if(ii{x, y} == finish) return out(dist[{x, y}]), 0;
+
+    auto posx = xs[x].upper_bound(y);
+    // se tiver algum y nessa reta, pegar o primeiro
+    if(posx != xs[x].end() && 
+       *posx-1 > y && 
+       dist.find({x, *posx-1}) == dist.end()) {
+        q.emplace(x, *posx-1);
+        dist[{x, *posx-1}] = dist[{x, y}] + 1;
+    }
+
+    posx = xs[x].lower_bound(y);
+    if(posx != xs[x].begin()) {
+      posx--;
+      if(*posx+1 < y && dist.find({x, *posx+1}) == dist.end()) {
+        q.emplace(x, *posx+1);
+        dist[{x, *posx+1}] = dist[{x, y}] + 1;
+      }
+    }
+
+    auto posy = ys[y].upper_bound(x);
+    // se tiver algum x nessa reta, pegar o primeiro
+    if(posy != ys[y].end() && 
+       *posy-1 > x && 
+       dist.find({*posy-1, y}) == dist.end()) {
+        q.emplace(*posy-1, y);
+        dist[{*posy-1, y}] = dist[{x, y}] + 1;
+    }
+
+    posy = ys[y].lower_bound(x);
+    if(posy != ys[y].begin()) {
+      posy--;
+      if(*posy+1 < x && dist.find({*posy+1, y}) == dist.end()) {
+        q.emplace(*posy+1, y);
+        dist[{*posy+1, y}] = dist[{x, y}] + 1;
+      }
+    }
+  }
+  out(-1);
+}

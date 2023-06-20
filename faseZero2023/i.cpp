@@ -58,50 +58,105 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+const int oo = 1e18;
+const int MAXN = (1 << 10);
+V<int> tb(MAXN, -1), proximo(MAXN, -1);
+V<int> vis(MAXN, 0);
+
+int toggle(int bit, int i) {
+    int newbit = bit;
+    if(i == 0) {
+      newbit ^= (1 << 1);
+      newbit ^= (1 << 4);
+    }else if(i == 1) {
+      newbit ^= (1 << 0);
+      newbit ^= (1 << 2);
+      newbit ^= (1 << 4);
+      newbit ^= (1 << 5);
+    }else if(i == 2) {
+      newbit ^= (1 << 1);
+      newbit ^= (1 << 3);
+      newbit ^= (1 << 5);
+      newbit ^= (1 << 6);
+    }else if(i == 3) {
+      newbit ^= (1 << 2);
+      newbit ^= (1 << 6);
+    }else if(i == 4) {
+      newbit ^= (1 << 0);
+      newbit ^= (1 << 1);
+      newbit ^= (1 << 5);
+      newbit ^= (1 << 7);
+    }else if(i == 5) {
+      newbit ^= (1 << 1);
+      newbit ^= (1 << 2);
+      newbit ^= (1 << 4);
+      newbit ^= (1 << 6);
+      newbit ^= (1 << 7);
+      newbit ^= (1 << 8);
+    }else if(i == 6) {
+      newbit ^= (1 << 2);
+      newbit ^= (1 << 3);
+      newbit ^= (1 << 5);
+      newbit ^= (1 << 8);
+    }else if(i == 7) {
+      newbit ^= (1 << 4);
+      newbit ^= (1 << 5);
+      newbit ^= (1 << 8);
+      newbit ^= (1 << 9);
+    }else if(i == 8) {
+      newbit ^= (1 << 5);
+      newbit ^= (1 << 6);
+      newbit ^= (1 << 7);
+      newbit ^= (1 << 9);
+    }else if(i == 9) {
+      newbit ^= (1 << 7);
+      newbit ^= (1 << 8);
+    }
+    return newbit;
+}
+
+int dp(int bit) {
+  if(__builtin_popcountll(bit) == 10) return 0;
+
+  if(vis[bit] == 1) return tb[bit];
+  if(vis[bit] == 2) return oo;
+
+  vis[bit] = 2;
+  auto& ans = tb[bit];
+  if(~ans) return ans;
+  ans = oo;
+
+  for(int i = 0; i < 10; i++) {
+    int newbit = toggle(bit, i);
+    int cur = 1 + dp(newbit);
+    if(cur < ans) {
+      ans = cur;
+      proximo[bit] = i;
+    }
+  }
+
+  vis[bit] = 1;
+  return ans;
+}
+
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  int x = 0;
+  for(int i = 0; i < 10; i++) {
+    int a; cin >> a;
+    x |= a << i;
+  } 
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  auto ans = dp(x);
+  if(ans == oo) out(-1);
+  else {
+    out(ans);
+    while(__builtin_popcountll(x) < 10) {
+      cout << proximo[x]+1;
+      x = toggle(x, proximo[x]);
+      if(__builtin_popcountll(x) == 10) cout << '\n';
+      else cout << ' ';
+    }
   }
 }
-
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80

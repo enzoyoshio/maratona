@@ -62,46 +62,38 @@ auto main() -> signed {
   fastio;
 
   int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+    int n; in(n);
+    string ans = "";
+    V<int> v(n);
+    in(v);
+  
+    V<int> cur;
+    bool first_less = true;
+    int idx = n;
+    for(int i = 0; i < n; i++) {
+      if(cur.empty() || cur.back() <= v[i]) { 
+        cur.eb(v[i]);
+        ans+= '1';
+      }else {
+        idx = i;
+        break;
+      }
+    }
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+    for(int i = idx; i < n; i++) {
+      if(first_less && v[i] <= cur[0]) {
+        first_less = false;
+        cur.eb(v[i]);
+        ans += '1';
+      }else if(cur.back() <= v[i] && v[i] <= cur[0]) {
+        cur.eb(v[i]);
+        ans+= '1';
+      }else if(first_less && cur.back() <= v[i]) {
+        cur.eb(v[i]);
+        ans += '1';
+      }else ans += '0';
+    }
+
+    out(ans);
   }
 }
-
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80

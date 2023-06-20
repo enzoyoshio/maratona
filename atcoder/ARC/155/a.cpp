@@ -58,50 +58,64 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+#define yes out("Yes")
+#define no out("No")
+
+const int N = 2e5+8;
+
+bool is_pal(string& s) {
+  int n = s.size();
+  for(int i = 0; i < n/2; i++) {
+    if(s[i] != s[n-i-1]) return false;
+  } 
+  return true;
+}
+
+string p;
+int neighbor[N];
+int walk(int u, char c) { // leader after inputting `c`
+    while (u != -1 && (u+1 >= (int)p.size() || p[u + 1] != c)) // leader doesn't match
+        u = neighbor[u];
+    return p[u + 1] == c ? u+1 : u;
+}
+void build() {
+    neighbor[0] = -1; // -1 is the leftmost state
+    for (int i = 1; i < (int)p.size(); i++)
+        neighbor[i] = walk(neighbor[i-1], p[i]);
+}
+
 auto main() -> signed {
   fastio;
 
   int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+    int n, k; in(n, k);
+    string s; in(s);
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+    if(n == k) { yes; continue;}
+
+    if(n > k) {
+      string s1 = s.substr(0, k);
+      string pal1 = s.substr(k);
+      string s2 = s.substr(n-k);
+      string pal2 = s.substr(0, n-k);
+      if(s1 == s2 && is_pal(pal1) && is_pal(pal2)) yes;
+      else no;
+      continue;
+    }
+
+    p = s;
+    build();
+    int tam = neighbor[n-1];
+    tam++;
+    //db(var(tam));
+
+    string s1 = s.substr(0, tam);
+    string pal1 = s.substr(tam);
+    string s2 = s.substr(n-tam);
+    string pal2 = s.substr(0, n-tam);
+
+    if(s1 == s2 && is_pal(pal1) && is_pal(pal2)) yes;
+    else no;
+
   }
 }
-
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80

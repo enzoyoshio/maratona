@@ -61,47 +61,48 @@ template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
-
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  int n, m, k;
+  in(n, m, k);
+  V<V<ii>> G(n);
+  for(int i = 0; i < m; i++) {
+    int a, b, c; in(a, b, c); a--, b--;
+    G[a].eb(b, c);
+    G[b].eb(a, c);
   }
-}
 
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80
+  V<ii> trains(k);
+  for(int i = 0; i < k; i++) {
+    int u, w; in(u, w);
+    u--;
+    G[0].eb(u, w);
+    G[u].eb(0, w);
+    trains[i] = {u, w};
+  }
+
+  // fazer o djikstra aqui
+  min_priority_queue<ii> pq;
+  pq.emplace(0, 0);
+  V<int> dist(n, (int)1e15);
+  dist[0] = 0;
+
+  while(pq.size()) {
+    auto [w, u] = pq.top();
+    pq.pop();
+
+    if(w > dist[u]) continue;
+
+    for(auto [v, peso]: G[u]) {
+      if(w + peso < dist[v]) {
+        dist[v] = w+peso;
+        pq.emplace(dist[v], v);
+      }
+    }
+  }
+
+  int ans = 0;
+  for(auto [v, p]: trains) {
+    if(dist[v] <= p) ans++;
+  }
+
+  out(ans);
+}

@@ -58,50 +58,152 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+const int oo = 1e11;
+const int MAXL = 20;
+using tiii = tuple<int,int,int>;
+int n, q, TIMER = -1;
+V<V<ii>> G;
+V<int> tin, tout;
+V<V<int>> parent;
+V<int> st, lazy, soma;
+V<tiii> edges;
+map<ii, int> cost;
+
+void prop(int sti, int stl, int str) {
+  if(lazy[sti] == 0) return;
+
+  st[sti] += (str-stl+1)*lazy[sti];
+  if(stl != str) {
+    lazy[2*sti] += lazy[sti];
+    lazy[2*sti+1] += lazy[sti];
+  }
+  lazy[sti] = 0;
+}
+
+int update(int ll, int rr, int val, 
+    int sti=1, int stl=0, int str=n) {
+  prop(sti, stl, str);
+
+  if(ll > str || rr < stl) return st[sti];
+
+  if(ll <= stl && str <= rr) {
+    lazy[sti] += val;
+    prop(sti, stl, str);
+    return st[sti];
+  }
+
+  int stm = (stl+str)/2, ste = 2*sti, std = 2*sti+1;
+
+  return st[sti] = update(ll, rr, val, ste, stl, stm) +
+                   update(ll, rr, val, std, stm+1, str);
+}
+
+int query(int ll, int rr, int sti=1, int stl=0, int str=n) {
+  prop(sti, stl, str);
+
+  if(ll > str || rr < stl) return 0;
+
+  if(ll <= stl && str <= rr) return st[sti];
+
+  int stm = (stl+str)/2, ste = 2*sti, std = 2*sti+1;
+
+  return query(ll, rr, ste, stl, stm) 
+    +    query(ll, rr, std, stm+1, str);
+}
+
+void dfs(int u, int v, int c) {
+  tin[u] = ++TIMER;
+
+  parent[u][0] = v;
+  soma[u] = soma[v] + c;
+  for(int i = 1; i < MAXL; i++) {
+    parent[u][i] = parent[parent[u][i-1]][i-1];
+  }
+
+  for(auto [a, w]: G[u]) if(a != v) {
+    dfs(a, u, w);
+  }
+  tout[u] = TIMER;
+}
+
+int is_ancestor(int u, int v) {
+  return tin[u] < tin[v] && tout[u] >= tout[v];
+}
+
+int lca(int u, int v) {
+  
+  //db(var(u), var(v));
+  if(is_ancestor(u, v)) {
+    return  query(tin[v], tin[v]) -
+            query(tin[u], tin[u]);
+  }
+
+  if(is_ancestor(v, u)) {
+    return  query(tin[u], tin[u]) -
+            query(tin[v], tin[v]);
+  }
+
+  int ans = query(tin[u], tin[u]) + query(tin[v], tin[v]);
+  /*
+  db(var(query(tin[u], tin[u])));
+  db(var(query(tin[v], tin[v])));
+  */
+
+  for(int i = MAXL-1; i >= 0; i--) {
+    if(!is_ancestor(parent[u][i], v)) u = parent[u][i];
+  }
+  /*
+  cerr << "ancestor\n";
+  db(var(parent[u][0]));
+  db(var(query(tin[parent[u][0]], tin[parent[u][0]])));
+  */
+
+  return ans - 2*query(tin[parent[u][0]], tin[parent[u][0]]);
+}
+
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  in(n);
+  G.resize(n+2);
+  tin.resize(n+2);
+  tout.resize(n+2);
+  parent.assign(n+2, V<int>(MAXL));
+  soma.resize(n+2);
+  lazy.assign(4*(n+2), 0);
+  edges.resize(n+1);
+  for(int i = 1; i < n; i++) {
+    int a, b, w; in(a, b, w);
+    G[a].eb(b, w);
+    G[b].eb(a, w);
+    edges[i] = {a, b, w};
+  }
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  G[0].eb(1, 0); 
+  dfs(0, 0, 0);
+  st.resize(4*(n+2));
+
+  for(int i = 1; i <= n; i++) {
+    update(tin[i], tin[i], soma[i]);
+  }
+
+  in(q);
+  while(q--) {
+    int type, a, b; in(type, a, b);
+
+    if(type == 1) {
+      auto [u, v, w] = edges[a];
+      if(parent[v][0] == u) swap(v, u);
+      // idx, w
+      int val = w;
+      int diff = val-b;
+      update(tin[u], tout[u], -diff);
+      edges[a] = {u, v, b};
+      soma[u] = -diff;
+    }else {
+      if(a == b) out(0);
+      else
+        out(lca(a, b));
+    }
   }
 }
-
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80

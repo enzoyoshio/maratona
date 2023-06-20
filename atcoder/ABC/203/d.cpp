@@ -58,50 +58,64 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+int n, k;
+
+int query(int i, int j, V<V<int>>& psum) {
+  return psum[i+k-1][j+k-1] 
+         - (i ? psum[i-1][j+k-1] : 0)
+         - (j ? psum[i+k-1][j-1] : 0)
+         + (i && j ? psum[i-1][j-1] : 0);
+}
+
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  in(n, k);
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  V<V<int>> grid(n, V<int>(n));
+  in(grid);
+
+  auto check = [&](int x) {
+    V<V<int>> psum(n, V<int>(n));
+
+    for(int i = 0; i < n; i++) {
+      for(int j = 0; j < n; j++) {
+        if(grid[i][j] <= x) psum[i][j] = 1;
+
+        if(i) psum[i][j] += psum[i-1][j];
+        if(j) psum[i][j] += psum[i][j-1];
+        if(i && j) psum[i][j] -= psum[i-1][j-1];
+      }
+    }
+
+    /*
+    cerr << endl << endl;
+    db(var(x));
+    for(auto it: psum)
+      cout << it << endl;
+      */
+
+    for(int i = 0; i+k-1 < n; i++) {
+      for(int j = 0; j+k-1 < n; j++) {
+        /*
+        db(var(i), var(j));
+        db(var(query(i, j, psum)));
+        */
+        if(query(i, j, psum) >= (k*k+1)/2) return true;
+      }
+    }
+
+    return false;
+  };
+
+  int l = 0, r = (int)1e9, ans = 1e9;
+  while(l <= r) {
+    int mid = (l+r)/2;
+//    db(var(mid));
+
+    if(check(mid)) ans = mid, r = mid-1;
+    else l = mid+1;
   }
-}
 
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80
+  out(ans);
+}

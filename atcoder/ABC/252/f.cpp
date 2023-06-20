@@ -58,50 +58,63 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+int n, l;
+V<int> v;
+
+int query(int l, int r) {
+  if(r < l) return 0;
+  if(!l) return v[r];
+  return v[r] - v[l-1];
+}
+
+int cost(int l, int r, int bread) {
+
+  if(l >= r) return 0;
+
+  int ans = bread;
+
+  int soma = query(l, r);
+  int want = soma/2;
+
+  int bl = l, br = r, bans = 0;
+
+  while(bl <= br) {
+    int bmid = (br + bl)/2;
+
+    if(query(l, bmid) > want) bans = bmid, br = bmid-1;
+    else bl = bmid+1;
+  }
+
+  int q1 = query(l, bans-1);
+  int q2 = query(bans, r);
+  if(max(q1, q2) <= bread/2) {
+    return ans + cost(l, bans-1, bread/2) + cost(bans, r, bread/2);
+  }
+
+  if(q1 > bread/2)
+    return ans + cost(l, bans-1, q1) + cost(bans, r, bread-q1);
+  return ans + cost(l, bans-1, bread-q2) + cost(bans, r, q2);
+}
+
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
-
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  in(n, l);
+  v.resize(n);
+  in(v);
+  sort(all(v));
+  min_priority_queue<int> pq;
+  for(auto it: v) pq.push(it);
+  for(int i = 1; i < n; i++)
+    v[i] += v[i-1];
+  int ans = 0;
+  if(l-v.back())
+    pq.push(l-v.back());
+  while(pq.size() > 1) {
+    auto u = pq.top(); pq.pop();
+    auto v = pq.top(); pq.pop();
+    ans += u+v;
+    pq.push(u+v);
   }
+  out(ans);
 }
-
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80

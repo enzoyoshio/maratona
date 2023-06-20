@@ -58,50 +58,76 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+const int oo = 1e17;
+int n, k, x; 
+V<int> v;
+V<V<int>> dp;
+
+int f(int idx=0, int qt=k) {
+
+  if(idx < 0) {
+    return 0;
+  }
+
+  auto& ans = dp[idx][qt];
+
+  if(~ans) return ans;
+
+  int pega = -oo, npega = -oo;
+
+  auto fNAOpega = f(idx-1, qt);
+  auto fpega = 0;
+
+  if(idx >= qt)
+    npega = max(v[idx]-x, v[idx]-x + fNAOpega);
+//  npega = max(npega, v[idx]-x + fNAOpega);
+
+  if(qt) {
+    fpega = f(idx-1, qt-1); 
+    if(idx >= qt-1)
+      pega = max(pega, v[idx]+x);
+    pega = max(pega, v[idx]+x + fpega);
+  }
+  
+  cerr << "\n\n------------------ db ------------------\n";
+  db(var(idx), var(qt));
+  db(var(pega));
+  db(var(npega));
+  db(var(v[idx]));
+  db(var(v[idx]-x));
+  db(var(v[idx]+x));
+  db(var(fpega));
+  db(var(fNAOpega));
+  ans = max(pega, npega);
+  db(var(ans));
+  return ans = max(pega, npega);
+}
+
 auto main() -> signed {
   fastio;
 
   int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+    in(n, k, x);
+    v.resize(n); in(v);
+    for(auto& it: v) it -= x;
+    dp.assign(n, V<int>(k+1, 0));
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+    for(int i = 2; i<= k; i++) dp[0][i] = -oo;
+    dp[0][0] = v[0];
+    dp[0][1] = v[0]+x;
+
+    for(int idx = 1; idx < n; idx++) {
+      for(int qt = 0; qt <= k; qt++) {
+        if(qt) {
+          dp[idx][qt] = max(dp[idx][qt], v[idx]+2*x + dp[idx-1][qt-1]);
+          dp[idx][qt] = max(dp[idx][qt], v[idx]+2*x);
+        }
+      }
+      //db(var(dp[idx][k]));
+    }
+    int ans = 0;
+    for(int i = 0; i < n; i++)
+      ans = max(ans, dp[i][k]);
+    out(ans);
   }
 }
-
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80

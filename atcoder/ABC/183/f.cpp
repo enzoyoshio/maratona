@@ -58,50 +58,59 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+struct DSU {
+  V<int> pai;
+  V<map<int,int>> color;
+  int n;
+
+  DSU(int _n, V<int> c) {
+    n = _n;
+    pai.resize(n);
+    iota(all(pai), 0LL);
+    color.resize(n);
+    for(int i = 0; i < n; i++)
+      color[i][c[i]] = 1;
+  }
+
+  int find(int x) { return x == pai[x] ? x : pai[x] = find(pai[x]);}
+
+  void join(int x, int y) {
+    x = find(x); y = find(y);
+    if(x == y) return;
+
+    if(color[x].size() < color[y].size()) swap(x, y);
+
+    pai[y] = x;
+    for(auto [a, b]: color[y]) color[x][a] += b;
+  }
+
+  int findClass(int x, int y) {
+    x = find(x);
+    if(color[x].find(y) == color[x].end()) return 0;
+    return color[x][y];
+  }
+};
 auto main() -> signed {
   fastio;
 
-  int t; in(t); while(t--) {
-    int l, r; in(l, r);
-    
-    int left = 0;
-    int cur = l;
-    while(cur <= r) cur *= 2, left++;
-    cout << left << ' ';
+  int n, q;
+  in(n, q);
+  V<int> color(n);
+  in(color);
+  for(auto& it: color) it--;
 
-    int right = 0;
-    right += max(r/(1<<(left-1)) - l + 1, 0LL);
-    right += max(r/((1<<(left-2))*3) - l +1, 0LL) * (left-1);
-    cout << right << '\n';
+  DSU d(n, color);
+
+  while(q--) {
+    int type, a, b; in(type, a, b);
+
+    if(type == 1) {
+      a--, b--;
+      d.join(a, b);
+    }else {
+      a--; b--;
+      out(d.findClass(a, b));    
+    }
+
   }
 }
-
-// 2^6
-// 4 -> 8 -> 16 -> 32 -> 64
-//
-// 96 
-// | 2 -> 48
-// | 2 -> 24
-// | 2 -> 12
-// | 2 -> 6
-// | 2 -> 3
-// | 3 -> 1
-//
-// 2^5 * 3^1
-//
-// 4 -> 8  -> 16 -> 32 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^5 -> 2^5 * 3
-// 4 -> 8  -> 16 -> 48 -> 96 | 2^2 -> 2^3 -> 2^4 -> 2^4 * 3 -> 2^4 * 3 * 2
-// 4 -> 8  -> 24 -> 48 -> 96 | 
-// 4 -> 12 -> 24 -> 48 -> 96
-// 6 -> 12 -> 24 -> 48 -> 96
-//
-// 80
-// | 2 -> 40
-// | 2 -> 20
-// | 2 -> 10
-// | 2 -> 5
-// | 5 -> 1
-//
-// 2^4 * 5^1
-//
-// 5 -> 10 -> 20 -> 40 -> 80
