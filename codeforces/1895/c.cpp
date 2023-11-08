@@ -70,59 +70,50 @@ auto main() -> signed {
   map<ii, int> mapa;
 
   for(int i = 0; i < n; i++) {
-    int soma = 0;
-    for(auto ch: v[i]) soma += ch-'0';
-    mapa[{v[i].size(), soma}]++;
-  }
-
-  /*
-  for(auto [a, b]: mapa) {
-    cout << "\n\npar tamanho " << a.first << " soma do numero " << a.second << endl;
-    cout << "histograma " << b << endl;
-  }
-  */
-
-  for(int i = 0; i < n; i++) {
-
+    int full = 0;
+    for(auto& ch: v[i]) full += ch-'0';
+    mapa[{size(v[i]), full}]++;
   }
 
   for(int i = 0; i < n; i++) {
-
-    int soma = 0;
-    int resto = 0;
+    
     int tam = v[i].size();
-    for(auto ch: v[i]) soma += ch-'0';
 
-    for(int j = v[i].size(); j > 0; j--) {
-      
-      ii a{abs(j), soma-resto};
+    for(int other = 1; other <= tam; other++) {
+      if((tam + other)%2) continue;
 
-      if((j + tam)%2 == 0) {
-   
-        cout << endl;
-        db(var(v[i]));
-        db(var(j));
-        db(var(soma));
-        db(var(resto));
-        db(var(a));
-        db(var(mapa[a]));
+      // caso minha string atual seja maior que a outra que eu to procuran
 
-        cout << " adicionei na resposta\n";
-
-        ans += mapa[a];
-        if(j < tam) {
-          cout << " ----------> double ans\n";
-          ans += mapa[a];
-          //ans++;
+      if( tam >= other ) {
+        int left = 0;
+        for(int j = 0; j < tam; j++) {
+            if(j < (tam+other)/2)
+              left += v[i][j]-'0';
+            else left -= v[i][j] - '0';
         }
-        db(var(ans));
+        ans += mapa[{other, left}]; 
       }
-      resto += v[i][j-1]-'0';
     }
-  }
 
+    reverse(begin(v[i]), end(v[i]));
+
+    for(int other = 1; other < tam; other++) {
+      if((tam + other)%2) continue;
+
+      // caso minha string atual seja maior que a outra que eu to procuran
+
+      if( tam >= other ) {
+        int left = 0;
+        for(int j = 0; j < tam; j++) {
+            if(j < (tam+other)/2)
+              left += v[i][j]-'0';
+            else left -= v[i][j] - '0';
+        }
+        ans += mapa[{other, left}]; 
+      }
+    }
+
+
+  }
   out(ans);
 }
-
-// 12345 / 42315
-
