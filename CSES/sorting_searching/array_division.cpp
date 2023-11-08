@@ -62,14 +62,16 @@ int n, k;
 V<int> v;
 
 bool check(int x) {
-  int groups = k, soma = 0;
+  int soma = 0, qt = 1;
   for(int i = 0; i < n; i++) {
+    if(v[i] > x) return false;
     if(soma + v[i] > x) {
-      if(!groups) return false;
-      groups--, soma = v[i];
-    }else soma += v[i];
+      soma = 0;
+      qt++;
+    }
+    soma += v[i];
   }
-  return groups == 0;
+  return qt <= k;
 }
 
 auto main() -> signed {
@@ -84,8 +86,8 @@ auto main() -> signed {
   while(l <= r) {
     int mid = (l+r)/2;
 
-    if(check(mid)) l = mid+1, ans = mid;
-    else r = mid-1;
+    if(check(mid)) r = mid-1, ans = mid;
+    else l = mid+1;
   }
 
   out(ans);

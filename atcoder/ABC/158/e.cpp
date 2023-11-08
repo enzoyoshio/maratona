@@ -20,24 +20,31 @@ signed main() {
     cin.tie(0)->sync_with_stdio(false);
 
     cin >> n >> p >> s;
-    reverse(s.begin(), s.end());
+    int ans = 0;
 
-//    if(p == 2 || p == 5) return cout << (n+1LL)*n/2LL << endl, 0;
+    if(p == 2) {
+      for(int i = 0; i < n; i++)
+        if((s[i]-'0')%2 == 0) ans += i+1;
+      return cout << ans << endl, 0;
+    }else if(p == 5) {
+      for(int i = 0; i < n; i++)
+        if((s[i]-'0')%5 == 0) ans += i+1;
+      return cout << ans << endl, 0;
+    }
+
+    reverse(s.begin(), s.end());
     vector<int> psum(n);
     map<int,int> lembra;
+    map<int,int> both;
     lembra[0] = 1;
-    int ans = 0;
     int dez = 0;
     for(int i = 0; i < n; i++) {
 	psum[i] = mul(s[i]-'0', fexp(10, i));
 	if(i) psum[i] = add(psum[i], psum[i-1]);
 
 	ans += lembra[psum[i]];
-	cout << "-------------------- db =---------------\n";
-	cout << "i = " << i << endl;
-	cout << "psum[i] = " << psum[i] << endl;
-	cout << "lembra[psum[i]] = " << lembra[psum[i]] << endl;
 	lembra[psum[i]]++;
     }
     cout << ans << endl;
 }
+
