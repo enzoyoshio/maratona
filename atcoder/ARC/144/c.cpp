@@ -64,17 +64,24 @@ auto main() -> signed {
   int n, k;
   in(n, k);
   if(k > n/2) return out(-1), 0;
-  set<int> s;
+
+  vector<int> ans(n);
+  set<int> disp;
   for(int i = 1; i <= n; i++)
-    s.insert(i);
+    disp.insert(i);
+
   for(int i = 1; i <= n; i++) {
-    if(s.find(i-k) != s.end()) {
-      cout << i-k << ' ';
-      s.erase(i-k);
+    int first = *begin(disp);
+    int upper = *disp.lower_bound(i+k);
+
+    if(upper + k > n || abs(first-i) < k) {
+      ans[i-1] = upper;
+      disp.erase(upper);
     }else {
-      s.b
-      cout << i+k << ' ';
-      s.erase(i+k);
+      ans[i-1] = first;
+      disp.erase(begin(disp));
     }
   }
+
+  out(ans);
 }

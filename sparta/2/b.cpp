@@ -64,45 +64,24 @@ auto main() -> signed {
   int n, m, k;
   in(n, m, k);
   V<V<ii>> G(n);
+  map<ii, int> edges;
+  map<int,int> trains;
+
   for(int i = 0; i < m; i++) {
     int a, b, c; in(a, b, c); a--, b--;
-    G[a].eb(b, c);
-    G[b].eb(a, c);
-  }
-
-  V<ii> trains(k);
-  for(int i = 0; i < k; i++) {
-    int u, w; in(u, w);
-    u--;
-    G[0].eb(u, w);
-    G[u].eb(0, w);
-    trains[i] = {u, w};
-  }
-
-  // fazer o djikstra aqui
-  min_priority_queue<ii> pq;
-  pq.emplace(0, 0);
-  V<int> dist(n, (int)1e15);
-  dist[0] = 0;
-
-  while(pq.size()) {
-    auto [w, u] = pq.top();
-    pq.pop();
-
-    if(w > dist[u]) continue;
-
-    for(auto [v, peso]: G[u]) {
-      if(w + peso < dist[v]) {
-        dist[v] = w+peso;
-        pq.emplace(dist[v], v);
-      }
+    if(edges.find({a, b}) == end(edges)) {
+      edges[{a, b}] = edges[{b, a}] = c;
+    }else {
+      edges[{a, b}] = min(edges[{a, b}], c);
+      edges[{b, a}] = min(edges[{b, a}], c);
     }
   }
 
-  int ans = 0;
-  for(auto [v, p]: trains) {
-    if(dist[v] <= p) ans++;
+  for(int i = 0; i < k; i++) {
+    int u, w; in(u, w);
+    u--;
+    if(trains.find(u) == trains.end()) trains[u] = w;
+    else trains[u] = min(trains[u], w);
   }
 
-  out(ans);
 }

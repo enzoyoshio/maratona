@@ -1,0 +1,171 @@
+
+[v[i] 5] 
+[j 1] 
+[soma 5] 
+[resto 0] 
+[a (1 5)] 
+[mapa[a] 1] 
+ adicionei na resposta
+[ans 1] 
+
+[v[i] 93746] 
+[j 5] 
+[soma 29] 
+[resto 0] 
+[a (5 29)] 
+[mapa[a] 1] 
+ adicionei na resposta
+[ans 2] 
+
+[v[i] 93746] 
+[j 3] 
+[soma 29] 
+[resto 10] 
+[a (3 19)] 
+[mapa[a] 0] 
+ adicionei na resposta
+ ----------> double ans
+[ans 2] 
+
+[v[i] 93746] 
+[j 1] 
+[soma 29] 
+[resto 20] 
+[a (1 9)] 
+[mapa[a] 0] 
+ adicionei na resposta
+ ----------> double ans
+[ans 2] 
+
+[v[i] 59] 
+[j 2] 
+[soma 14] 
+[resto 0] 
+[a (2 14)] 
+[mapa[a] 1] 
+ adicionei na resposta
+[ans 3] 
+
+[v[i] 3746] 
+[j 4] 
+[soma 20] 
+[resto 0] 
+[a (4 20)] 
+[mapa[a] 1] 
+ adicionei na resposta
+[ans 4] 
+
+[v[i] 3746] 
+[j 2] 
+[soma 20] 
+[resto 10] 
+[a (2 10)] 
+[mapa[a] 1] 
+ adicionei na resposta
+ ----------> double ans
+[ans 6] 
+
+[v[i] 593] 
+[j 3] 
+[soma 17] 
+[resto 0] 
+[a (3 17)] 
+[mapa[a] 2] 
+ adicionei na resposta
+[ans 8] 
+
+[v[i] 593] 
+[j 1] 
+[soma 17] 
+[resto 12] 
+[a (1 5)] 
+[mapa[a] 1] 
+ adicionei na resposta
+ ----------> double ans
+[ans 10] 
+
+[v[i] 746] 
+[j 3] 
+[soma 17] 
+[resto 0] 
+[a (3 17)] 
+[mapa[a] 2] 
+ adicionei na resposta
+[ans 12] 
+
+[v[i] 746] 
+[j 1] 
+[soma 17] 
+[resto 10] 
+[a (1 7)] 
+[mapa[a] 0] 
+ adicionei na resposta
+ ----------> double ans
+[ans 12] 
+
+[v[i] 5937] 
+[j 4] 
+[soma 24] 
+[resto 0] 
+[a (4 24)] 
+[mapa[a] 1] 
+ adicionei na resposta
+[ans 13] 
+
+[v[i] 5937] 
+[j 2] 
+[soma 24] 
+[resto 10] 
+[a (2 14)] 
+[mapa[a] 1] 
+ adicionei na resposta
+ ----------> double ans
+[ans 15] 
+
+[v[i] 46] 
+[j 2] 
+[soma 10] 
+[resto 0] 
+[a (2 10)] 
+[mapa[a] 1] 
+ adicionei na resposta
+[ans 16] 
+
+[v[i] 59374] 
+[j 5] 
+[soma 28] 
+[resto 0] 
+[a (5 28)] 
+[mapa[a] 1] 
+ adicionei na resposta
+[ans 17] 
+
+[v[i] 59374] 
+[j 3] 
+[soma 28] 
+[resto 11] 
+[a (3 17)] 
+[mapa[a] 2] 
+ adicionei na resposta
+ ----------> double ans
+[ans 21] 
+
+[v[i] 59374] 
+[j 1] 
+[soma 28] 
+[resto 23] 
+[a (1 5)] 
+[mapa[a] 1] 
+ adicionei na resposta
+ ----------> double ans
+[ans 23] 
+
+[v[i] 6] 
+[j 1] 
+[soma 6] 
+[resto 0] 
+[a (1 6)] 
+[mapa[a] 1] 
+ adicionei na resposta
+[ans 24] 
+24

@@ -58,6 +58,8 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
+const int oo = 1e18+1;
+
 auto main() -> signed {
   fastio;
 
@@ -68,11 +70,15 @@ auto main() -> signed {
   for(int bitmask = 1; bitmask < 1 << k; bitmask++) {
     int mod = __builtin_popcountll(bitmask);
     mod %= 2;
+    int prod = 1;
+    bool add = true;
     for(int i = 0; i < k; i++) {
       if((bitmask >> i) & 1) {
-        sum += n/v[i] * (mod == 1 ? 1 : -1);
-      } 
+        if(prod > oo/v[i]) add = false;
+        else prod *= v[i];
+      }
     } 
+    if(add) sum += n/(mod ? prod : -prod);
   }
   cout << sum << endl;
 }
