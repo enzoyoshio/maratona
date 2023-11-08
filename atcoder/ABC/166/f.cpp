@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+<<<<<<< HEAD
 using namespace std;
 
 // Template (v1.4.2 - 2023-04-22) (codeforces:EYZ, atcoder:EYZ) {{{
@@ -108,4 +109,90 @@ auto main() -> signed {
 
   cout << "Yes\n";
   for(auto it: ans) cout << char('A'+it) << '\n';
+=======
+
+using namespace std;
+#define int long long
+
+signed main() {
+	cin.tie(0)->sync_with_stdio(false);
+
+	int n, a, b, c;
+	cin >> n >> a >> b >> c;
+	vector<string> v(n);
+	for(int i = 0; i < n; i++) {
+		cin >> v[i];
+	}
+
+	// se eh tudo zero, entao nao tem jeito
+	// alguem vai ficar negativo
+	if(a + b + c == 0) return cout << "No\n", 0;
+
+	vector cur{a, b, c};
+	string ans = "";
+
+	for(int i = 0; i < n; i++) {
+
+		if(cur[0] < 0 || cur[1] < 0 || cur[2] < 0) return cout << "No\n", 0;
+	
+		// se tem so um cara positivo
+		if(accumulate(begin(cur), end(cur), 0) == 1) {
+			// se os dois que eu tenho que alterar sao zero, 
+			// entao eh impossivel pq um dos dois fica negativo
+
+			if(!cur[v[i][0]-'A'] && !cur[v[i][1]-'A']) return cout << "No\n", 0;
+			// se um dos dois eh positivo eu so flipo eles
+			if(cur[v[i][0]-'A']) {
+				ans += v[i][1];
+				cur[v[i][0]-'A']--;
+				cur[v[i][1]-'A']++;
+			}else {
+				ans += v[i][0];
+				cur[v[i][0]-'A']++;
+				cur[v[i][1]-'A']--;
+			}
+		}else {
+		// nesse else a soma >= 2
+			if(!cur[v[i][0]-'A'] && !cur[v[i][1]-'A']) return cout << "No\n", 0;
+
+			// se um dos dois for zero, entao eu sou obrigado
+			if(!cur[v[i][0]-'A'] && cur[v[i][1]-'A']) {
+				cur[v[i][0]-'A']++;
+				cur[v[i][1]-'A']--;
+				ans += v[i][0];
+			}else if(cur[v[i][0]-'A'] && !cur[v[i][1]-'A']) {
+				cur[v[i][1]-'A']++;
+				cur[v[i][0]-'A']--;
+				ans += v[i][1];
+			}else if(accumulate(begin(cur), end(cur), 0) == 2 && cur[v[i][0]-'A'] && cur[v[i][1]-'A'] && i+1 < n && v[i] != v[i+1]) {
+
+				if(v[i][0] == v[i+1][0] || v[i][0] == v[i+1][1]) {
+					cur[v[i][0]-'A']++;
+					cur[v[i][1]-'A']--;
+					ans += v[i][0];
+				}else {
+					cur[v[i][1]-'A']++;
+					cur[v[i][0]-'A']--;
+					ans += v[i][1];
+				}
+				
+			}else {
+				if(cur[v[i][0]-'A'] < cur[v[i][1]-'A']) {
+					cur[v[i][0]-'A']++;
+					cur[v[i][1]-'A']--;
+					ans+=v[i][0];
+				}else {
+					cur[v[i][1]-'A']++;
+					cur[v[i][0]-'A']--;
+					ans+=v[i][1];
+
+				}
+			}
+		}
+	}
+	if(cur[0] < 0 || cur[1] < 0 || cur[2] < 0) return cout << "No\n", 0;
+
+	cout << "Yes\n";
+	for(auto ch: ans) cout << ch << '\n';
+>>>>>>> e1ffc2a (mais sol no windows)
 }

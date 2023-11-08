@@ -1,0 +1,18 @@
+passagem bsb : cairo -> R$6,709.55
+passagem cairo : sharm -> USD 202.60 ~ R$1,000.00
+passagem total : R$7,709.55
+estadia cairo : USD 1,000.00 ~ R$5,000.00
+visto : R$ 120,00
+total Egito : R$12,829.55
+
+passagem bsb : SFO -> R$4,512.81
+estadia SFO : USD 548.41 ~  R$2,742.05
+visto : R$940,00
+total SFO : R$8,154.86
+
+total : R$21,964.41
+Auxilio-UNB : R$10,000.00
+Auxilio-CAD : R$5,000.00
+(talvez) Auxilio-UNB-CAD : R$1,500.00
+(auxilio EdA - falar com Mandelli)
+(auxilio banco ?) 

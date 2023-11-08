@@ -58,11 +58,7 @@ template<class... A> void print(A const&... a) { ((cout << a), ...); }
 template<class... A> void db(A const&... a) { ((cout << (a)), ...); cout << endl; }
 //}}}
 
-int n; 
-V<V<int>> grid;
-map<iii, int> ans;
-int res = 0;
-
+/*
 int dp(int i=0, int j=0, int bit=0) {
   if(i >= n || j >= n) return 0;
   if(i == n-1 && j == n-1) {
@@ -72,13 +68,86 @@ int dp(int i=0, int j=0, int bit=0) {
   if(ans.find(iii{i, j, bit}) != ans.end()) return ans[{i, j, bit}];
   return ans[{i, j, bit}] = dp(i+1, j, bit ^ grid[i][j]) + dp(i, j+1, bit ^grid[i][j]);
 }
+*/
+
+int n; 
+V<V<int>> grid;
+vector from(20, V<unordered_map<int,int>>(20));
+vector low(20, V<unordered_map<int,int>>(20));
 
 auto main() -> signed {
   fastio;
 
+  int res = 0;
   in(n);
   grid.resize(n, V<int>(n));
   in(grid);
 
-  out(dp());
+
+  from[0][0][grid[0][0]] = 1;
+  for(int i = 0; i < n; i++) {
+	for(int j = 0; j < n; j++) {
+		/*
+		cerr << "\n\ndebugging from\n";
+		db(var(i), var(j));
+		db(var(from[i][j]));
+		*/
+		for(auto [xorsum, qt]: from[i][j]) {
+			if(i+1 < n)
+				from[i+1][j][xorsum^grid[i+1][j]] += qt;
+			if(j+1 < n)
+				from[i][j+1][xorsum^grid[i][j+1]] += qt;
+		}
+		if(j+i == n-1) break;
+	}
+  }
+
+  low[n-1][n-1][grid.back().back()] = 1;
+  for(int i = n-1; i >= 0; i--) {
+	for(int j = n-1; j >= 0; j--) {
+		/*
+		cerr << "\n\ndebugging low\n";
+		db(var(i), var(j));
+		db(var(low[i][j]));
+		*/
+		for(auto [xorsum, qt]: low[i][j]) {
+			if(i-1 >= 0)
+				low[i-1][j][xorsum^grid[i-1][j]] += qt;
+			if(j-1 >= 0)
+				low[i][j-1][xorsum^grid[i][j-1]] += qt;
+		}
+		if(j+i == n-1) break;
+	}
+  }
+
+  for(int i = 0; i < n; i++) {
+	  int j = n-1-i;
+	  for(auto [xorsum, qt]: from[i][j]) {
+	
+		if(i+1 < n && low[i+1][j].find(xorsum) != end(low[i][j]))
+		{
+	/*	
+			cerr << "\n\nmergeando na pos " << endl;
+			db(var(i), var(j));
+			db(var(xorsum));
+			db(var(qt), var(low[i+1][j][xorsum]));
+			*/
+		       res += qt * low[i+1][j][xorsum];	
+		}
+
+		
+		if(j+1 < n && low[i][j+1].find(xorsum) != end(low[i][j+1]))
+		{
+			/*
+			cerr << "\n\nmergeando na pos " << endl;
+			db(var(i), var(j));
+			db(var(xorsum));
+			db(var(qt), var(low[i][j+1][xorsum]));
+			*/
+		       res += qt * low[i][j+1][xorsum];	
+		}
+	  }
+  }
+//  db(var(res));
+  out(res);
 }

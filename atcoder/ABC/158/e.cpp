@@ -1,76 +1,43 @@
 #include <bits/stdc++.h>
-
 #define int long long
-
 using namespace std;
 
-int fexp(int b, int e, int p) {
+int n, p; 
+string s;
+
+int mul(int a, int b) { return (a*b)%p;}
+int add(int a, int b) { return (a+b)%p;}
+int sub(int a, int b) { return ((a-b)%p+p)%p;}
+int fexp(int b, int e=p-2) {
     if(e == 0) return 1LL;
-
-    int x = fexp(b, e/2, p);
-    x = (x*x)%p;
-
-    if(e%2) x = (x*b)%p;
-
+    int x = fexp(b, e/2);
+    x = mul(x, x);
+    if(e%2) x = mul(x, b);
     return x;
-}
-
-int inv(int n, int p) {
-    return fexp(n, p-2, p);
 }
 
 signed main() {
     cin.tie(0)->sync_with_stdio(false);
 
-    int n, p; 
-    string s;
     cin >> n >> p >> s;
     reverse(s.begin(), s.end());
 
+//    if(p == 2 || p == 5) return cout << (n+1LL)*n/2LL << endl, 0;
     vector<int> psum(n);
-    int base = 1;
-    int ans = 0;
     map<int,int> lembra;
-
+    lembra[0] = 1;
+    int ans = 0;
+    int dez = 0;
     for(int i = 0; i < n; i++) {
-        psum[i] = (base * (s[i]-'0'))%p;
-        base = (base*10)%p;
-        cout << "calculado " << psum[i] << endl;
-        if(i) psum[i] = (psum[i] + psum[i-1])%p;
-        cout << "soma " << psum[i] << endl;
-        ans += lembra[psum[i]];
-        lembra[psum[i]]++;    
-    }
-    cout << s << endl;
-    for(auto el: psum) cout << el << ' ';
-    cout << endl;
+	psum[i] = mul(s[i]-'0', fexp(10, i));
+	if(i) psum[i] = add(psum[i], psum[i-1]);
 
-    int brute = 0;
-    for(int i = 0; i < n; i++) {
-        for(int j = i; j < n; j++) {
-            if(i && ( (psum[j]-psum[i-1] + p)%p * inv(fexp(10, i, p), p) ) %p == 0) {
-                cout << "\n\noi\n";
-                cout << "id = " << j <<  ' ' << i << '\n';
-                cout << "psum j = " << psum[j] << " psum i - 1 = " << psum[i-1] << endl;
-                for(int k = j; k >= i; k--) 
-                    cout << s[k];
-                cout << endl;
-                brute++;
-            }else if((psum[j] * inv(fexp(10, j, p), p))%p == 0) {
-                cout << "\n\noi\n";
-                cout << "id = " << j << endl;
-                cout << "psum j = " << psum[j] << endl;
-                for(int k = j; k >= i; k--) 
-                    cout << s[k];
-                cout << endl;
-                brute++;
-            }
-        }
+	ans += lembra[psum[i]];
+	cout << "-------------------- db =---------------\n";
+	cout << "i = " << i << endl;
+	cout << "psum[i] = " << psum[i] << endl;
+	cout << "lembra[psum[i]] = " << lembra[psum[i]] << endl;
+	lembra[psum[i]]++;
     }
-
-    cout << "brute = " << brute << endl;
     cout << ans << endl;
-
-
-
 }
