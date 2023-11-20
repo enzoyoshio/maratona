@@ -1,11 +1,14 @@
 #include <bits/stdc++.h>
-
-#pragma GCC target("avx2,bmi,bmi2,popcnt,lzcnt")
-#pragma GCC optimize("O3,unroll-loops")
-
 using namespace std;
 
-using piv = pair<int, vector<int>>;
+vector<vector<int>> v, g;
+vector<int> vis;
+
+void dfs(int u, int p, int c) {
+  if(u != c) v[c][u] = 1;
+  vis[u] = c;
+  for(auto v: g[u]) if(v != p && vis[v] < c) dfs(v, u, c);
+}
 
 int main() {
 	cin.tie(0)->sync_with_stdio(false);
@@ -13,58 +16,25 @@ int main() {
 	int n, m;
 	cin >> n >> m;
 
-	vector<vector<int>> v(n, vector<int>(n, 0));
-	vector<piv> to(n, piv());
+  v.resize(n, vector<int>(n, 0));
+  g.resize(n);
+  vis.resize(n, -1);
 
-	while(m--) {
+  for(int i = 0; i < m; i++) {
 		int a, b; cin >> a >> b;
 		a--, b--;
 
 		v[a][b] = 1;
-		to[a].first = a;
-		to[a].second.push_back(b);
+    g[a].push_back(b);
 	}
 
-	sort(to.begin(), to.end(), [](piv a, piv b) {
-		return a.second.size() < b.second.size();
-			});
+  for(int i = 0; i < n; i++)
+    dfs(i, i, i);
 
-	int ans = 0;
+  int ans = 0;
+  for(auto it: v)
+    ans += accumulate(begin(it), end(it), 0LL);
 
-	for(int i = 0; i < n; i++) {
-		int aux = i;
-		for(auto el: to[i].second) {
+  cout << ans - m << endl;
 
-		}
-	}
-
-	for(int i = 0; i < n; i++) {
-		for(int j = 0; j < n; j++) {
-			if(i == j) continue;
-
-			if(v[i][j]) {
-				queue<int> q;
-				for(auto el: to[j])
-					if(i != el)
-						q.emplace(el);
-				
-				while(q.size()) {
-					auto u = q.front(); q.pop();
-
-					//cout << i << ' ' << j << ' ' <<  u << '\n';
-					if(v[i][u]) continue;
-
-					ans++;
-					v[i][u] = 1;
-					to[i].push_back(u);
-					for(auto el: to[u])
-						if(!v[i][el] && i != el)
-							q.emplace(el);
-				}
-			}
-		}
-	}
-
-	cout << ans << endl;
-	
 }
